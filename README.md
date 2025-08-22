@@ -77,43 +77,39 @@ graph TB
 
 Each scene point is modeled as an anisotropic 3D Gaussian:
 
-$
-G(\mathbf{x};\, \mu_i, \Sigma_i)
-= \frac{1}{(2\pi)^{3/2}\,|\Sigma_i|^{1/2}}
-  \exp\!\left(-\tfrac{1}{2}(\mathbf{x}-\mu_i)^\top \Sigma_i^{-1} (\mathbf{x}-\mu_i)\right)
-$
+```math
+G(\mathbf{x}; \mu_i, \Sigma_i) = \frac{1}{(2\pi)^{3/2}|\Sigma_i|^{1/2}} \exp\left(-\frac{1}{2}(\mathbf{x}-\mu_i)^T \Sigma_i^{-1} (\mathbf{x}-\mu_i)\right)
+```
 
 The covariance matrix is factorized for numerical stability:
 
-$
-\Sigma_i = R_i S_i S_i^\top R_i^\top
-$
+```math
+\Sigma_i = R_i S_i S_i^T R_i^T
+```
 
 **Where:**
-- \(R_i \in \mathrm{SO}(3)\): rotation from unit quaternion \(q_i\)
-- \(S_i\): diagonal scale with \(\exp(s_i)\) entries
+- **R_i ∈ SO(3)**: rotation from unit quaternion q_i
+- **S_i**: diagonal scale with exp(s_i) entries
 
 ### Volume Rendering Equation
 
-**Front-to-back compositing**
+**Front-to-back compositing:**
 
-$
-C(p)=\sum_i c_i(d)\,\alpha_i(p)\,T_i(p),
-\qquad
-T_i(p)=\prod_{j=1}^{i-1}\bigl(1-\alpha_j(p)\bigr)
-$
+```math
+C(p) = \sum_i c_i(d) \alpha_i(p) T_i(p), \quad T_i(p) = \prod_{j=1}^{i-1}(1-\alpha_j(p))
+```
 
-Auxiliary:
+**Auxiliary formulas:**
 
-\[
-m_i = p - \pi(\mu_i), \quad \Sigma_{2D}=J\,\Sigma_i\,J^\top
-\]
+```math
+m_i = p - \pi(\mu_i), \quad \Sigma_{2D} = J \Sigma_i J^T
+```
 
 ### Multi-Modal Loss Function
 
-$
+```math
 \mathcal{L} = w_{rgb}\mathcal{L}_{rgb} + w_{depth}\mathcal{L}_{depth} + w_{tactile}\mathcal{L}_{tactile} + w_{reg}\mathcal{L}_{reg}
-$
+```
 
 **Loss Components:**
 - **L_rgb**: Photometric L1 loss for RGB consistency

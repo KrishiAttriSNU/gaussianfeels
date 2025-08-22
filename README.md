@@ -20,7 +20,24 @@ GaussianFeels represents a novel approach to multi-modal 3D reconstruction, exte
 
 ## 📊 Architecture Knowledge Graph
 
-### 1. Input Modalities
+### 1. System Overview
+```mermaid
+graph LR
+    A[Input Modalities] --> B[3D Gaussian Field]
+    B --> C[Volumetric Rendering]
+    C --> D[Optimization Loop]
+    D --> B
+    B --> E[Field Maintenance]
+    E --> B
+    
+    style A fill:#e1f5fe
+    style B fill:#e8f5e8
+    style C fill:#fff3e0
+    style D fill:#fce4ec
+    style E fill:#f1f8e9
+```
+
+### 2. Input Modalities
 ```mermaid
 graph LR
     A[RGB-D Cameras] --> D[Multi-Modal Fusion]
@@ -33,7 +50,7 @@ graph LR
     style D fill:#e8f5e8
 ```
 
-### 2. 3D Gaussian Field
+### 3. 3D Gaussian Field
 ```mermaid
 graph TB
     A[Gaussian Parameters] --> B["Positions μᵢ ∈ ℝ³"]
@@ -50,7 +67,7 @@ graph TB
     style F fill:#f1f8e9
 ```
 
-### 3. Volumetric Rendering
+### 4. Volumetric Rendering
 ```mermaid
 graph LR
     A[Gaussian Parameters] --> B["3D→2D Projection"]
@@ -63,7 +80,7 @@ graph LR
     style D fill:#f3e5f5
 ```
 
-### 4. Optimization Loop
+### 5. Optimization Loop
 ```mermaid
 graph TB
     A[RGB + Depth Output] --> B[Multi-Modal Loss]
@@ -87,7 +104,7 @@ graph TB
     style H fill:#e8f5e8
 ```
 
-### 5. Field Maintenance
+### 6. Field Maintenance
 ```mermaid
 graph LR
     A[Adaptive Densification] --> B[Split High-Gradient]
@@ -102,23 +119,6 @@ graph LR
     style C fill:#e3f2fd
     style D fill:#e3f2fd
     style E fill:#e8f5e8
-```
-
-### 6. System Overview
-```mermaid
-graph LR
-    A[Input Modalities] --> B[3D Gaussian Field]
-    B --> C[Volumetric Rendering]
-    C --> D[Optimization Loop]
-    D --> B
-    B --> E[Field Maintenance]
-    E --> B
-    
-    style A fill:#e1f5fe
-    style B fill:#e8f5e8
-    style C fill:#fff3e0
-    style D fill:#fce4ec
-    style E fill:#f1f8e9
 ```
 
 ## 🧮 Mathematical Framework

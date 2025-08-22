@@ -20,55 +20,105 @@ GaussianFeels represents a novel approach to multi-modal 3D reconstruction, exte
 
 ## 📊 Architecture Knowledge Graph
 
+### 1. Input Modalities
+```mermaid
+graph LR
+    A[RGB-D Cameras] --> D[Multi-Modal Fusion]
+    B[Tactile Sensors] --> D
+    C[Pose Estimation] --> D
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#fff3e0
+    style D fill:#e8f5e8
+```
+
+### 2. 3D Gaussian Field
 ```mermaid
 graph TB
-    subgraph "Input Modalities"
-        A[RGB-D Cameras] --> D[Multi-Modal Fusion]
-        B[Tactile Sensors] --> D
-        C[Pose Estimation] --> D
-    end
+    A[Gaussian Parameters] --> B[Positions μᵢ ∈ ℝ³]
+    A --> C[Rotations qᵢ ∈ S³]
+    A --> D[Scales sᵢ ∈ ℝ³]
+    A --> E[Opacity αᵢ ∈ (0,1)]
+    A --> F[SH Coeffs cᵢ ∈ ℝ⁴⁸]
     
-    subgraph "3D Gaussian Field"
-        D --> E[Gaussian Parameters]
-        E --> E1["Positions μᵢ ∈ ℝ³"]
-        E --> E2["Rotations qᵢ ∈ S³"]
-        E --> E3["Scales sᵢ ∈ ℝ³"]
-        E --> E4["Opacity αᵢ ∈ (0,1)"]
-        E --> E5["SH Coeffs cᵢ ∈ ℝ⁴⁸"]
-    end
+    style A fill:#e8f5e8
+    style B fill:#f1f8e9
+    style C fill:#f1f8e9
+    style D fill:#f1f8e9
+    style E fill:#f1f8e9
+    style F fill:#f1f8e9
+```
+
+### 3. Volumetric Rendering
+```mermaid
+graph LR
+    A[Gaussian Parameters] --> B[3D→2D Projection]
+    B --> C[Alpha Compositing]
+    C --> D[RGB + Depth Output]
     
-    subgraph "Volumetric Rendering"
-        E1 --> F["3D→2D Projection"]
-        E2 --> F
-        E3 --> F
-        F --> G[Alpha Compositing]
-        E4 --> G
-        E5 --> G
-        G --> H[RGB + Depth Output]
-    end
+    style A fill:#e8f5e8
+    style B fill:#fff3e0
+    style C fill:#fce4ec
+    style D fill:#f3e5f5
+```
+
+### 4. Optimization Loop
+```mermaid
+graph TB
+    A[RGB + Depth Output] --> B[Multi-Modal Loss]
+    B --> C[L_rgb: Photometric]
+    B --> D[L_depth: Geometric]
+    B --> E[L_tactile: Contact]
+    B --> F[L_reg: Smoothness]
+    C --> G[Gradient Descent]
+    D --> G
+    E --> G
+    F --> G
+    G --> H[Parameter Update]
     
-    subgraph "Optimization"
-        H --> I[Multi-Modal Loss]
-        I --> I1["L_rgb: Photometric"]
-        I --> I2["L_depth: Geometric"]
-        I --> I3["L_tactile: Contact"]
-        I --> I4["L_reg: Smoothness"]
-        I1 --> J[Gradient Descent]
-        I2 --> J
-        I3 --> J
-        I4 --> J
-        J --> E
-    end
+    style A fill:#f3e5f5
+    style B fill:#fce4ec
+    style C fill:#fff8e1
+    style D fill:#fff8e1
+    style E fill:#fff8e1
+    style F fill:#fff8e1
+    style G fill:#e0f2f1
+    style H fill:#e8f5e8
+```
+
+### 5. Field Maintenance
+```mermaid
+graph LR
+    A[Adaptive Densification] --> B[Split High-Gradient]
+    A --> C[Clone Under-Reconstructed]
+    A --> D[Prune Low-Opacity]
+    B --> E[Updated Field]
+    C --> E
+    D --> E
     
-    subgraph "Field Maintenance"
-        E --> K[Adaptive Densification]
-        K --> K1[Split High-Gradient]
-        K --> K2[Clone Under-Reconstructed] 
-        K --> K3[Prune Low-Opacity]
-        K1 --> E
-        K2 --> E
-        K3 --> E
-    end
+    style A fill:#f1f8e9
+    style B fill:#e3f2fd
+    style C fill:#e3f2fd
+    style D fill:#e3f2fd
+    style E fill:#e8f5e8
+```
+
+### 6. System Overview
+```mermaid
+graph LR
+    A[Input Modalities] --> B[3D Gaussian Field]
+    B --> C[Volumetric Rendering]
+    C --> D[Optimization Loop]
+    D --> B
+    B --> E[Field Maintenance]
+    E --> B
+    
+    style A fill:#e1f5fe
+    style B fill:#e8f5e8
+    style C fill:#fff3e0
+    style D fill:#fce4ec
+    style E fill:#f1f8e9
 ```
 
 ## 🧮 Mathematical Framework

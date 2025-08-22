@@ -77,32 +77,43 @@ graph TB
 
 Each scene point is modeled as an anisotropic 3D Gaussian:
 
-$$G(x; μᵢ, Σᵢ) = \frac{1}{(2π)^{3/2}|\Σᵢ|^{1/2}} \exp\left(-\frac{1}{2}(x-μᵢ)^T Σᵢ^{-1} (x-μᵢ)\right)$$
+$
+G(\mathbf{x};\, \mu_i, \Sigma_i)
+= \frac{1}{(2\pi)^{3/2}\,|\Sigma_i|^{1/2}}
+  \exp\!\left(-\tfrac{1}{2}(\mathbf{x}-\mu_i)^\top \Sigma_i^{-1} (\mathbf{x}-\mu_i)\right)
+$
 
 The covariance matrix is factorized for numerical stability:
 
-$$Σᵢ = R_i S_i S_i^T R_i^T$$
+$
+\Sigma_i = R_i S_i S_i^\top R_i^\top
+$
 
 **Where:**
-- **Rᵢ ∈ SO(3)**: Rotation matrix from unit quaternion qᵢ
-- **Sᵢ**: Diagonal scale matrix with exp(sᵢ) entries (log-parameterized)
+- \(R_i \in \mathrm{SO}(3)\): rotation from unit quaternion \(q_i\)
+- \(S_i\): diagonal scale with \(\exp(s_i)\) entries
 
 ### Volume Rendering Equation
 
-**Corrected Front-to-Back Compositing** (fixes critical transmittance bug):
+**Front-to-back compositing**
 
-$$C(p) = \sum_{i} c_i(d) \alpha_i(p) T_i(p)$$
+$
+C(p)=\sum_i c_i(d)\,\alpha_i(p)\,T_i(p),
+\qquad
+T_i(p)=\prod_{j=1}^{i-1}\bigl(1-\alpha_j(p)\bigr)
+$
 
-**Where:**
-- **cᵢ(d)**: View-dependent color from spherical harmonics
-- **αᵢ(p)**: 2D Gaussian weight at pixel p  
-- **Tᵢ(p) = ∏ⱼ₌₁ⁱ⁻¹(1-αⱼ(p))**: Transmittance (critical fix)
-- **mᵢ = p - π(μᵢ)**: Pixel offset from projected center
-- **Σ₂D = J Σᵢ J^T**: 2D covariance from 3D via projection Jacobian J
+Auxiliary:
+
+\[
+m_i = p - \pi(\mu_i), \quad \Sigma_{2D}=J\,\Sigma_i\,J^\top
+\]
 
 ### Multi-Modal Loss Function
 
-$$\mathcal{L} = w_{rgb}\mathcal{L}_{rgb} + w_{depth}\mathcal{L}_{depth} + w_{tactile}\mathcal{L}_{tactile} + w_{reg}\mathcal{L}_{reg}$$
+$
+\mathcal{L} = w_{rgb}\mathcal{L}_{rgb} + w_{depth}\mathcal{L}_{depth} + w_{tactile}\mathcal{L}_{tactile} + w_{reg}\mathcal{L}_{reg}
+$
 
 **Loss Components:**
 - **L_rgb**: Photometric L1 loss for RGB consistency

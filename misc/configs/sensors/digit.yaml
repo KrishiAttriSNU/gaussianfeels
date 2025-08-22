@@ -1,0 +1,161 @@
+# @package tactile  
+# DIGIT sensor configuration for fusion pipeline
+
+data:
+  dataset_path: ???  # Provided by parent config
+  
+processing:
+  predictor_type: ???  # Provided by parent config
+  
+touch_depth:
+  model_type: ???  # Provided by parent config
+  confidence_threshold: 0.1
+  
+sampling:
+  n_rays: 5
+  depth_range: [-0.01, 0.05]
+  max_contacts_per_frame: 100
+  
+sensor:
+  digit_size: 0.022
+
+# DIGIT sensor configurations (required by tactile pipeline)
+sensor0:  # thumb
+  name: thumb
+  tactile_depth:
+    mode: ${predictor}
+    use_real_data: true
+  sampling:
+    n_rays: 5
+    n_strat_samples: 10
+    n_surf_samples: 10
+    depth_range: [-0.01, 0.05]
+    surface_samples_offset: 1e-3
+    dist_behind_surf: 2e-2
+    loss_ratio: 0.1
+    free_space_ratio: 0.0
+  kf_min_loss: 1e-2
+  gel:
+    origin: [0.022, 0, 0]
+    width: 0.02
+    height: 0.03
+    curvature: true
+    curvatureMax: 0.004
+    R: 0.1
+    countW: 100
+  viz:
+    reduce_factor: 1
+    reduce_factor_up: 1
+  pose:
+    qw: 0.5
+    qx: -0.5
+    qy: 0.5
+    qz: -0.5
+    x: 0.002132
+    y: -0.000021
+    z: 0.017545
+                
+sensor1:  # index
+  name: index
+  tactile_depth:
+    mode: ${predictor}
+    use_real_data: true
+  sampling:
+    n_rays: 5
+    n_strat_samples: 10
+    n_surf_samples: 10
+    depth_range: [-0.01, 0.05]
+    surface_samples_offset: 1e-3
+    dist_behind_surf: 2e-2
+    loss_ratio: 0.1
+    free_space_ratio: 0.0
+  kf_min_loss: 1e-2
+  gel:
+    origin: [0.022, 0, 0]
+    width: 0.02
+    height: 0.03
+    curvature: true
+    curvatureMax: 0.004
+    R: 0.1
+    countW: 100
+  viz:
+    reduce_factor: 1
+    reduce_factor_up: 1
+  pose:
+    qw: 0.5
+    qx: -0.5
+    qy: 0.5
+    qz: -0.5
+    x: 0.002132
+    y: -0.000021
+    z: 0.017545
+    
+sensor2:  # middle
+  name: middle
+  tactile_depth:
+    mode: ${predictor}
+    use_real_data: true
+  sampling:
+    n_rays: 5
+    n_strat_samples: 10
+    n_surf_samples: 10
+    depth_range: [-0.01, 0.05]
+    surface_samples_offset: 1e-3
+    dist_behind_surf: 2e-2
+    loss_ratio: 0.1
+    free_space_ratio: 0.0
+  kf_min_loss: 1e-2
+  gel:
+    origin: [0.022, 0, 0]
+    width: 0.02
+    height: 0.03
+    curvature: true
+    curvatureMax: 0.004
+    R: 0.1
+    countW: 100
+  viz:
+    reduce_factor: 1
+    reduce_factor_up: 1
+  pose:
+    qw: 0.5
+    qx: -0.5
+    qy: 0.5
+    qz: -0.5
+    x: 0.002132
+    y: -0.000021
+    z: 0.017545
+    
+sensor3:  # ring
+  name: ring
+  tactile_depth:
+    mode: ${predictor}
+    use_real_data: true
+  sampling:
+    n_rays: 5
+    n_strat_samples: 10
+    n_surf_samples: 10
+    depth_range: [-0.01, 0.05]
+    surface_samples_offset: 1e-3
+    dist_behind_surf: 2e-2
+    loss_ratio: 0.1
+    free_space_ratio: 0.0
+  kf_min_loss: 1e-2
+  gel:
+    origin: [0.022, 0, 0]
+    width: 0.02
+    height: 0.03
+    curvature: true
+    curvatureMax: 0.004
+    R: 0.1
+    countW: 100
+  viz:
+    reduce_factor: 1
+    reduce_factor_up: 1
+  pose:
+    qw: 0.5
+    qx: -0.5
+    qy: 0.5
+    qz: -0.5
+    x: 0.002132
+    y: -0.000021
+    z: 0.017545

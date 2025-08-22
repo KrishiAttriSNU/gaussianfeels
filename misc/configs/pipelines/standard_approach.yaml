@@ -1,0 +1,98 @@
+# Standard Approach Configuration
+# ===================================
+# 
+# This configuration ensures correct usage of feelsight_real data following the standard approach.
+# 
+# Key Points:
+# 1. Use ONLY front-left camera for reconstruction (primary camera)
+# 2. Use ALL three cameras for pseudo ground truth generation offline
+# 3. Evaluation uses GT poses and mesh with ADD-S and F-score metrics
+# 4. Time alignment synchronizes GT poses to primary camera frame times
+
+# Reconstruction Configuration (Single Primary Camera)
+reconstruction:
+  # Use only primary camera for SLAM/reconstruction loop
+  cameras: ["front-left"]  # Standard approach uses single primary camera
+  primary_camera: "front-left"  # Paper shows front-left performs best
+  
+  # Lock intrinsics/extrinsics to primary camera
+  intrinsics_source: "front-left"  # Use K_front_left only
+  extrinsics_source: "front-left"  # Use T_front_left→base only
+  
+  # Do not concatenate point clouds from other cameras during reconstruction
+  multi_camera_fusion: false
+  point_cloud_aggregation: false
+
+# Ground Truth Generation Configuration (All Cameras)
+ground_truth:
+  # Use all three cameras for "known-shape tracking" job
+  cameras: ["front-left", "back-right", "top-down"]  # All cameras for GT
+  
+  # Low sampling rate for GT poses as suggested
+  sampling_rate: 0.5  # Hz (~0.5 Hz as mentioned)
+  
+  # Feed all cameras into tracker to solve poses
+  tracking_method: "multi_camera_fusion"  # Use all three cameras
+  
+  # GT generation is offline process
+  offline_processing: true
+
+# Data Loading Configuration
+data:
+  # Filter frames by camera_id for reconstruction inputs
+  reconstruction_camera_filter: "front-left"
+  
+  # Dataset path structure
+  dataset_type: "feelsight_real"
+  expected_cameras: ["front-left", "back-right", "top-down"]
+  
+  # Time alignment
+  time_alignment:
+    method: "nearest_neighbor"  # or "linear_interpolation"
+    target_fps: 1.0  # Primary camera frame rate
+
+# Evaluation Configuration  
+evaluation:
+  # Use pseudo ground truth for evaluation
+  gt_source: "pseudo_gt.json"  # Generated offline
+  mesh_source: "scan.obj"      # Scanned mesh for ADD-S
+  
+  # Evaluation metrics
+  metrics:
+    - "ADD-S"    # Average Distance of Model Points - Symmetric
+    - "F-score"  # Surface reconstruction quality
+    
+  thresholds:
+    add_s: 0.02    # 2cm threshold
+    f_score: 0.01  # 1cm threshold
+
+# Camera-Specific Settings (from standard realsense.yaml)
+camera_settings:
+  # Front-left camera (primary for reconstruction)
+  front-left:
+    optimal_mask_size: 15000.0
+    sam_offset: 0.0
+    role: "primary"  # Primary camera for reconstruction
+    
+  # Back-right camera (GT only)
+  back-right:
+    optimal_mask_size: 5000.0
+    sam_offset: 0.01
+    role: "gt_only"  # Used only for GT generation
+    
+  # Top-down camera (GT only)
+  top-down:
+    optimal_mask_size: 4000.0
+    sam_offset: 0.0
+    role: "gt_only"  # Used only for GT generation
+
+# Pipeline Summary
+summary: |
+  Standard Approach Implementation:
+  
+  ✅ Reconstruction inputs: cameras = ["front-left"]
+  ✅ GT tracker inputs (offline): cameras = ["front-left", "back-right", "top-down"] 
+  ✅ Eval metrics source: poses = pseudo_gt.json, mesh = scan.obj
+  
+  This matches NeuralFeels: single primary camera for results; 
+  three cameras fused only for pseudo GT.

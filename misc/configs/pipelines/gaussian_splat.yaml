@@ -1,0 +1,21 @@
+# @package fusion
+# Gaussian Splatting fusion configuration
+
+backend: gaussian_splatting
+
+splat:
+  # Zone of influence parameters
+  k_sigma: 3.0
+  k_nearest: 20
+  
+  # Loss weighting
+  lambda_pos_base: 1.0
+  lambda_cov_base: 0.5
+  lambda_reg: 1e-6
+  
+  # Numerical stability
+  epsilon: 1e-8
+  
+  # Fusion strategy
+  fusion_mode: proximity_based
+  confidence_weighting: true

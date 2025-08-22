@@ -1,0 +1,119 @@
+# Object pose optimization for GaussianFeels
+# Real-time pose tracking and refinement for object-centric coordinates
+
+# Optimization framework
+enable_pose_optimization: true
+method: "joint_gaussian_pose"  # Joint Gaussian-pose optimization
+backend: "pytorch"  # pytorch|theseus
+
+# Pose optimizer configuration
+pose_optimizer:
+  solver: "levenberg_marquardt"  # LM solver for robustness
+  max_iterations: 50  # Reduced for real-time performance
+  step_size: 0.1  # Conservative step size
+  
+  # Convergence criteria
+  abs_err_tolerance: 1e-4  # Absolute error tolerance
+  rel_err_tolerance: 1e-4  # Relative error tolerance
+  early_stopping: true  # Stop on convergence
+  
+  # Jacobian computation
+  jacobian_mode: "auto"  # auto|analytical|numerical
+  jacobian_check: false  # Disable for performance
+  
+# Cost functions for pose optimization
+cost_functions:
+  # Gaussian reprojection error
+  gaussian_reprojection:
+    enabled: true
+    weight: 1.0
+    robust_kernel: "huber"  # huber|cauchy|none
+    huber_delta: 0.01
+  
+  # Tactile alignment
+  tactile_icp:
+    enabled: true
+    weight: 2.0  # Higher weight for tactile
+    point_to_plane: true  # Use point-to-plane ICP
+    max_correspondence_dist: 0.05  # 5cm maximum
+    
+  # Visual alignment  
+  visual_alignment:
+    enabled: true
+    weight: 0.5  # Lower weight for vision
+    feature_based: false  # Use dense alignment
+    
+  # Temporal smoothness
+  temporal_prior:
+    enabled: true
+    weight: 0.1
+    position_sigma: 0.01  # 1cm position noise
+    rotation_sigma: 0.1  # 0.1 rad rotation noise
+    
+# Multi-modal integration
+multi_modal:
+  fusion_strategy: "weighted"  # weighted|selective|adaptive
+  
+  # Modality weights (aligned with fusion config)
+  tactile_weight: 0.8  # Primary tactile weight
+  vision_weight: 0.2  # Secondary vision weight
+  
+  # Adaptive weighting based on confidence
+  adaptive_weighting:
+    enabled: true
+    confidence_metric: "residual"  # residual|covariance
+    min_weight: 0.1  # Minimum modality weight
+    max_weight: 0.9  # Maximum modality weight
+    
+# Pose representation
+pose:
+  representation: "se3"  # SE(3) Lie group representation
+  parameterization: "quaternion"  # quaternion|axis_angle|matrix
+  
+  # Pose constraints
+  constraints:
+    max_translation_step: 0.1  # 10cm max step
+    max_rotation_step: 0.5  # 0.5 rad max step
+    workspace_bounds:  # Object workspace limits
+      x: [-2.0, 2.0]
+      y: [-2.0, 2.0] 
+      z: [0.0, 2.0]
+      
+# Optimization schedule
+schedule:
+  # Real-time optimization
+  mode: "real_time"  # real_time|batch|hybrid
+  
+  # Optimization triggers
+  triggers:
+    new_tactile_contact: true  # Optimize on new contact
+    tactile_movement: true  # Optimize during movement
+    frame_interval: 5  # Optimize every N frames
+    residual_threshold: 0.01  # Optimize if error > threshold
+    
+  # Batch optimization (for offline processing)
+  batch:
+    enabled: true
+    window_size: 100  # Frames in optimization window
+    stride: 50  # Window stride
+    global_refinement: true  # Final global optimization
+    
+# Integration with Gaussian optimization
+gaussian_integration:
+  joint_optimization: false  # Keep pose and Gaussian optimization separate
+  pose_prior_weight: 0.01  # Influence on Gaussian positions
+  update_gaussian_positions: true  # Transform Gaussians with pose
+  
+# Performance settings
+performance:
+  parallel_residuals: true  # Parallel residual computation
+  gpu_acceleration: true  # GPU-accelerated optimization
+  sparse_solver: "cholmod"  # Sparse linear solver
+  preconditioning: true  # Precondition linear system
+  
+# Debugging and visualization
+debug:
+  visualize_residuals: true  # Show optimization residuals
+  plot_convergence: true  # Convergence plots
+  save_trajectory: true  # Save optimized trajectory
+  log_level: "info"  # debug|info|warning|error

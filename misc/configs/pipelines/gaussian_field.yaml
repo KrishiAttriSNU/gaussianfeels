@@ -1,0 +1,157 @@
+# Gaussian field configuration for GaussianFeels
+# Object-centric Gaussian splatting with memory management
+
+# Model type
+type: "object_gaussian_map"
+backend: "cuda"  # cuda|cpu
+
+# Precision strategy
+precision:
+  # Mixed precision for efficiency
+  geometry_precision: "fp32"  # Positions, rotations, scales
+  appearance_precision: "fp16"  # Colors, opacity
+  sh_precision: "fp32"  # Spherical harmonics coefficients
+  
+  # Computation precision
+  accumulation_precision: "fp32"  # Rendering accumulation
+  gradient_precision: "fp32"  # Gradient computation
+
+# Memory management (Critical for real-time performance)
+memory:
+  # Hard limits (enforced)
+  max_gaussians: 300000  # Maximum 300k active Gaussians
+  max_memory_mb: 158  # Target memory usage
+  
+  # Soft limits (triggers adaptation)
+  target_gaussians: 200000  # Target for pruning
+  min_gaussians: 10000  # Minimum to maintain
+  
+  # Memory strategies
+  automatic_management: true  # Enable automatic pruning
+  aggressive_mode_threshold: 0.9  # 90% memory usage triggers aggressive pruning
+  
+  # Spatial acceleration
+  use_spatial_hash: true  # Enable spatial hashing
+  hash_table_size: 1048576  # 1M buckets
+  bucket_size: 32  # Gaussians per bucket
+
+# Gaussian parameters
+gaussian_params:
+  # Spherical harmonics degree
+  sh_degree: 3  # 48 coefficients (RGB, degree 3)
+  
+  # Initialization strategies
+  initialization:
+    # Position initialization
+    position_noise: 0.0  # No position noise
+    
+    # Scale initialization
+    scale_init_method: "adaptive"  # adaptive|fixed|random
+    scale_init_factor: 1.0  # Scale multiplier
+    min_scale: 0.0001  # Minimum scale (1/10 mm)
+    max_scale: 0.1  # Maximum scale (10 cm)
+    
+    # Opacity initialization
+    opacity_init: 0.1  # Initial opacity
+    opacity_activation: "sigmoid"  # sigmoid|softplus
+    
+    # Rotation initialization
+    rotation_init: "identity"  # identity|random
+    
+    # Color initialization
+    color_init_method: "from_points"  # from_points|random|constant
+    sh_init_method: "constant"  # constant|random|from_color
+
+# Coordinate system
+coordinate_system:
+  type: "object_centric"  # Object-centric coordinates
+  
+  # Transform tracking
+  track_object_pose: true  # Track T_WO(i)
+  pose_estimation: "icp_based"  # icp_based|feature_based|hybrid
+  
+  # Coordinate validation
+  validate_transforms: true  # Validate all transforms
+  max_condition_number: 1000.0  # Maximum condition number
+  
+  # Interpolation for rendering
+  interpolation:
+    enabled: true  # 1kHz interpolation
+    method: "spherical_linear"  # For rotations
+    position_method: "cubic_spline"  # For positions
+
+# Densification strategy
+densification:
+  enabled: true
+  
+  # Gradient-based densification
+  gradient_threshold: 0.0002  # Position gradient threshold
+  densify_percent: 0.01  # Top 1% by gradient
+  
+  # Size-based splitting
+  split_threshold: 0.02  # Maximum scale before split
+  split_factor: 1.6  # Scale division factor
+  
+  # Clone settings
+  clone_threshold: 0.0002  # Gradient threshold for cloning
+  clone_scale_factor: 0.8  # Scale reduction factor
+  
+  # Scheduling
+  start_iteration: 500
+  end_iteration: 15000
+  interval: 100  # Densify every N iterations
+
+# Pruning strategy  
+pruning:
+  enabled: true
+  
+  # Opacity-based pruning
+  opacity_threshold: 0.005  # Minimum opacity
+  opacity_reset_interval: 3000  # Reset opacity periodically
+  
+  # Size-based pruning
+  max_scale_threshold: 0.5  # Maximum allowed scale
+  min_scale_threshold: 0.00001  # Minimum allowed scale
+  
+  # View-based pruning
+  min_view_count: 3  # Minimum views to keep Gaussian
+  track_view_count: true  # Enable view counting
+  
+  # Memory-based pruning
+  memory_aware: true  # Prune based on memory pressure
+  keep_salient: true  # Preserve high-gradient Gaussians
+
+# Rendering configuration
+rendering:
+  # Rasterization settings
+  tile_size: 16  # Tile size for rasterization
+  frustum_culling: true  # Enable frustum culling
+  depth_sorting: true  # Sort by depth
+  
+  # Anti-aliasing
+  antialiasing: true  # Enable anti-aliasing
+  filter_size: 0.3  # Gaussian filter size
+  
+  # Performance
+  backward_pass: true  # Enable gradients
+  fast_culling: true  # Fast culling algorithm
+  
+# Integration with other components
+integration:
+  # Tactile integration
+  tactile_weight_multiplier: 1.5  # Boost tactile Gaussians
+  contact_area_densification: true  # Extra densification at contacts
+  
+  # Temporal consistency
+  temporal_smoothing: true  # Smooth over time
+  history_weight: 0.1  # Weight of previous frame
+  
+  # Multi-resolution
+  level_of_detail: false  # Disable LOD for consistency
+  
+# Debug and analysis
+debug:
+  track_statistics: true  # Track Gaussian statistics
+  save_histograms: true  # Save parameter distributions
+  validate_gradients: true  # Check for NaN/Inf
+  memory_profiling: true  # Profile memory usage

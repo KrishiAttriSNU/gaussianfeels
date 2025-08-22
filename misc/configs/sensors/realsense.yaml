@@ -1,0 +1,18 @@
+# @package camera
+# RealSense camera configuration for fusion pipeline
+
+data:
+  dataset_path: ???  # Provided by parent config
+  
+processing:
+  predictor_type: camera
+  
+sampling:
+  n_rays: 400
+  depth_range: [0.3, 1.0]
+  
+gaussian:
+  initial_scale: 0.01
+  density_neighbors: 4
+  opacity_min: 0.1
+  opacity_max: 1.0

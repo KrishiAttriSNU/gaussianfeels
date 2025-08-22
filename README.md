@@ -30,15 +30,15 @@ graph TB
     
     subgraph "3D Gaussian Field"
         D --> E[Gaussian Parameters]
-        E --> E1[Positions μᵢ ∈ ℝ³]
-        E --> E2[Rotations qᵢ ∈ S³]
-        E --> E3[Scales sᵢ ∈ ℝ³]
-        E --> E4[Opacity αᵢ ∈ [0,1]]
-        E --> E5[SH Coeffs cᵢ ∈ ℝ⁴⁸]
+        E --> E1["Positions μᵢ ∈ ℝ³"]
+        E --> E2["Rotations qᵢ ∈ S³"]
+        E --> E3["Scales sᵢ ∈ ℝ³"]
+        E --> E4["Opacity αᵢ ∈ (0,1)"]
+        E --> E5["SH Coeffs cᵢ ∈ ℝ⁴⁸"]
     end
     
     subgraph "Volumetric Rendering"
-        E1 --> F[3D→2D Projection]
+        E1 --> F["3D→2D Projection"]
         E2 --> F
         E3 --> F
         F --> G[Alpha Compositing]
@@ -49,10 +49,10 @@ graph TB
     
     subgraph "Optimization"
         H --> I[Multi-Modal Loss]
-        I --> I1[L_rgb: Photometric]
-        I --> I2[L_depth: Geometric]  
-        I --> I3[L_tactile: Contact]
-        I --> I4[L_reg: Smoothness]
+        I --> I1["L_rgb: Photometric"]
+        I --> I2["L_depth: Geometric"]
+        I --> I3["L_tactile: Contact"]
+        I --> I4["L_reg: Smoothness"]
         I1 --> J[Gradient Descent]
         I2 --> J
         I3 --> J
@@ -77,14 +77,11 @@ graph TB
 
 Each scene point is modeled as an anisotropic 3D Gaussian:
 
-```math
-G(x; μᵢ, Σᵢ) = \frac{1}{(2π)^{3/2}|\Σᵢ|^{1/2}} \exp\left(-\frac{1}{2}(x-μᵢ)^T Σᵢ^{-1} (x-μᵢ)\right)
-```
+$$G(x; μᵢ, Σᵢ) = \frac{1}{(2π)^{3/2}|\Σᵢ|^{1/2}} \exp\left(-\frac{1}{2}(x-μᵢ)^T Σᵢ^{-1} (x-μᵢ)\right)$$
 
 The covariance matrix is factorized for numerical stability:
-```math
-Σᵢ = R_i S_i S_i^T R_i^T
-```
+
+$$Σᵢ = R_i S_i S_i^T R_i^T$$
 
 where:
 - **Rᵢ ∈ SO(3)**: Rotation matrix from unit quaternion qᵢ
@@ -94,20 +91,18 @@ where:
 
 **Corrected Front-to-Back Compositing** (fixes critical transmittance bug):
 
-```math
-C(p) = \sum_{i} c_i(d) \alpha_i(p) T_i(p)
-```
+$$C(p) = \sum_{i} c_i(d) \alpha_i(p) T_i(p)$$
 
 where:
 - **cᵢ(d)**: View-dependent color from spherical harmonics
 - **αᵢ(p)**: 2D Gaussian weight at pixel p
 - **Tᵢ(p) = ∏ⱼ₌₁ⁱ⁻¹(1-αⱼ(p))**: Transmittance (critical fix)
+- **mᵢ = p - π(μᵢ)**: Pixel offset from projected center
+- **Σ₂D = J Σᵢ J^T**: 2D covariance from 3D via projection Jacobian J
 
 ### Multi-Modal Loss Function
 
-```math
-\mathcal{L} = w_{rgb}\mathcal{L}_{rgb} + w_{depth}\mathcal{L}_{depth} + w_{tactile}\mathcal{L}_{tactile} + w_{reg}\mathcal{L}_{reg}
-```
+$$\mathcal{L} = w_{rgb}\mathcal{L}_{rgb} + w_{depth}\mathcal{L}_{depth} + w_{tactile}\mathcal{L}_{tactile} + w_{reg}\mathcal{L}_{reg}$$
 
 **Loss Components:**
 - **L_rgb**: Photometric L1 loss for RGB consistency

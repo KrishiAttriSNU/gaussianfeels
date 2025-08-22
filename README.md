@@ -83,7 +83,7 @@ The covariance matrix is factorized for numerical stability:
 
 $$Σᵢ = R_i S_i S_i^T R_i^T$$
 
-where:
+**Where:**
 - **Rᵢ ∈ SO(3)**: Rotation matrix from unit quaternion qᵢ
 - **Sᵢ**: Diagonal scale matrix with exp(sᵢ) entries (log-parameterized)
 
@@ -93,9 +93,9 @@ where:
 
 $$C(p) = \sum_{i} c_i(d) \alpha_i(p) T_i(p)$$
 
-where:
+**Where:**
 - **cᵢ(d)**: View-dependent color from spherical harmonics
-- **αᵢ(p)**: 2D Gaussian weight at pixel p
+- **αᵢ(p)**: 2D Gaussian weight at pixel p  
 - **Tᵢ(p) = ∏ⱼ₌₁ⁱ⁻¹(1-αⱼ(p))**: Transmittance (critical fix)
 - **mᵢ = p - π(μᵢ)**: Pixel offset from projected center
 - **Σ₂D = J Σᵢ J^T**: 2D covariance from 3D via projection Jacobian J
@@ -137,25 +137,28 @@ gaussianfeels/
 ### Processing Pipeline
 
 ```mermaid
-sequenceDiagram
-    participant S as Sensors
-    participant F as Fusion
-    participant G as Gaussian Field  
-    participant R as Rasterizer
-    participant O as Optimizer
-    
-    loop Training Step
-        S->>F: RGB-D + Tactile Data
-        F->>G: Multi-Modal Frame
-        G->>R: Gaussian Parameters
-        R->>R: Volume Rendering
-        R->>O: Rendered RGB + Depth
-        O->>O: Compute Multi-Modal Loss
-        O->>G: Update Parameters
+flowchart LR
+    subgraph "Training Loop"
+        A[Sensors] --> B[Multi-Modal Fusion]
+        B --> C[Gaussian Field]
+        C --> D[Volume Rendering]
+        D --> E[RGB + Depth Output]
+        E --> F[Multi-Modal Loss]
+        F --> G[Parameter Update]
+        G --> C
         
-        Note over G: Adaptive Field Maintenance
-        G->>G: Split/Clone/Prune
+        C --> H[Field Maintenance]
+        H --> I[Split/Clone/Prune]
+        I --> C
     end
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#e8f5e8
+    style D fill:#fff3e0
+    style E fill:#fce4ec
+    style F fill:#f1f8e9
+    style G fill:#e0f2f1
 ```
 
 ## 🚀 Performance Characteristics

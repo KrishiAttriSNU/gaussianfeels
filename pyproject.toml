@@ -1,0 +1,179 @@
+[build-system]
+requires = ["setuptools>=64.0", "wheel", "setuptools-scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gaussianfeels"
+description = "Multi-Modal 3D Gaussian Splatting for Real-Time Object Reconstruction"
+readme = "README.md"
+authors = [
+    {name = "Krishi Attri", email = "kattri@snu.ac.kr"}
+]
+maintainers = [
+    {name = "Krishi Attri", email = "kattri@snu.ac.kr"}
+]
+keywords = [
+    "gaussian-splatting", "3d-reconstruction", "computer-vision", "robotics", 
+    "tactile-sensing", "multi-modal", "real-time", "neural-rendering"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research", 
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9", 
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent"
+]
+requires-python = ">=3.8"
+dependencies = [
+    "torch>=2.0.0",
+    "torchvision>=0.15.0", 
+    "torchaudio>=2.0.0",
+    "numpy>=1.22.0",
+    "scipy>=1.9.0",
+    "opencv-python>=4.7.0",
+    "open3d>=0.17.0",
+    "trimesh>=3.20.0",
+    "matplotlib>=3.7.0",
+    "plotly>=5.15.0",
+    "Pillow>=9.0.0",
+    "scikit-image>=0.20.0",
+    "scikit-learn>=1.2.0",
+    "pandas>=2.0.0",
+    "seaborn>=0.12.0",
+    "hydra-core>=1.3.0",
+    "omegaconf>=2.3.0",
+    "pyyaml>=6.0",
+    "kornia>=0.7.0",
+    "roma>=1.3.0",
+    "theseus-ai>=0.2.0",
+    "scikit-optimize>=0.9.0",
+    "timm>=0.9.0",
+    "transformers>=4.30.0",
+    "tqdm>=4.65.0",
+    "termcolor>=2.3.0",
+    "pathlib2>=2.3.0",
+    "dataclasses-json>=0.5.0",
+    "typing-extensions>=4.5.0",
+    "psutil>=5.9.0",
+    "memory-profiler>=0.60.0",
+    "line-profiler>=4.0.0",
+    "snakeviz>=2.2.0",
+    "yappi>=1.4.0",
+    "wandb>=0.15.0",
+    "tensorboard>=2.13.0",
+    "h5py>=3.8.0",
+    "imageio>=2.30.0",
+    "imageio-ffmpeg>=0.4.8",
+    "pickle-mixin>=1.0.2",
+    "requests>=2.30.0",
+    "gdown>=4.7.0",
+    "ffmpeg-python>=0.2.0",
+    "urdf-parser-py>=0.0.4",
+    "pycocotools>=2.0.7",
+    "einops>=0.6.1",
+    "numba>=0.57.0",
+    "ipython>=8.12.0",
+    "ipykernel>=6.22.0",
+    "jupyter>=1.0.0",
+    "ipywidgets>=8.0.0",
+    "pyglet>=1.5.27",
+    "pyopengl>=3.1.0",
+    "pyvista>=0.40.0",
+    "networkx>=3.1",
+    "shapely>=2.0.0",
+    "rtree>=1.0.0",
+    "libspatialindex>=1.9.3",
+    "rich>=13.0.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "websockets>=11.0.0"
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.3.0",
+    "black>=23.0.0", 
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.3.0",
+    "pre-commit>=3.0.0"
+]
+docs = [
+    "sphinx>=6.0.0",
+    "sphinx-rtd-theme>=1.2.0", 
+    "myst-parser>=2.0.0",
+    "sphinxcontrib-mermaid>=0.8.0"
+]
+gpu = [
+    "torch-scatter",
+    "torch-sparse", 
+    "torch-geometric"
+]
+
+[project.urls]
+Homepage = "https://github.com/KrishiAttriSNU/gaussianfeels"
+Repository = "https://github.com/KrishiAttriSNU/gaussianfeels.git"
+Documentation = "https://gaussianfeels.readthedocs.io/"
+"Bug Reports" = "https://github.com/KrishiAttriSNU/gaussianfeels/issues"
+
+[project.scripts]
+gaussianfeels = "gaussianfeels.main:main"
+gf = "gaussianfeels.main:main"
+
+[project.entry-points."console_scripts"]
+gaussianfeels-server = "gaussianfeels.server:main"
+gaussianfeels-eval = "gaussianfeels.evaluation:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gaussianfeels*", "camera*", "tactile*", "fusion*"]
+exclude = ["tests*", "docs*", "examples*"]
+
+[tool.setuptools.package-data]
+gaussianfeels = ["*.yaml", "*.yml", "*.json", "*.txt"]
+"camera.gaussianfeels" = ["*.yaml", "*.yml", "*.json", "*.txt"]
+"tactile.gaussianfeels" = ["*.yaml", "*.yml", "*.json", "*.txt"]
+
+[tool.setuptools-scm]
+write_to = "gaussianfeels/_version.py"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.isort]
+profile = 'black'
+line_length = 100
+
+[tool.ruff]
+line-length = 100
+select = [
+  "E", "F", "I", "UP", "B", "SIM", "PL",
+]
+ignore = [
+  "E501",
+]
+
+[tool.ruff.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.mypy]
+python_version = "3.11"
+disallow_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+

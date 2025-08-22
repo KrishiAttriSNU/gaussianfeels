@@ -36,11 +36,11 @@ graph LR
 ### 2. 3D Gaussian Field
 ```mermaid
 graph TB
-    A[Gaussian Parameters] --> B[Positions μᵢ ∈ ℝ³]
-    A --> C[Rotations qᵢ ∈ S³]
-    A --> D[Scales sᵢ ∈ ℝ³]
-    A --> E[Opacity αᵢ ∈ (0,1)]
-    A --> F[SH Coeffs cᵢ ∈ ℝ⁴⁸]
+    A[Gaussian Parameters] --> B["Positions μᵢ ∈ ℝ³"]
+    A --> C["Rotations qᵢ ∈ S³"]
+    A --> D["Scales sᵢ ∈ ℝ³"]
+    A --> E["Opacity αᵢ ∈ (0,1)"]
+    A --> F["SH Coeffs cᵢ ∈ ℝ⁴⁸"]
     
     style A fill:#e8f5e8
     style B fill:#f1f8e9
@@ -53,7 +53,7 @@ graph TB
 ### 3. Volumetric Rendering
 ```mermaid
 graph LR
-    A[Gaussian Parameters] --> B[3D→2D Projection]
+    A[Gaussian Parameters] --> B["3D→2D Projection"]
     B --> C[Alpha Compositing]
     C --> D[RGB + Depth Output]
     
@@ -67,10 +67,10 @@ graph LR
 ```mermaid
 graph TB
     A[RGB + Depth Output] --> B[Multi-Modal Loss]
-    B --> C[L_rgb: Photometric]
-    B --> D[L_depth: Geometric]
-    B --> E[L_tactile: Contact]
-    B --> F[L_reg: Smoothness]
+    B --> C["L_rgb: Photometric"]
+    B --> D["L_depth: Geometric"]
+    B --> E["L_tactile: Contact"]
+    B --> F["L_reg: Smoothness"]
     C --> G[Gradient Descent]
     D --> G
     E --> G

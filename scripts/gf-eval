@@ -1,0 +1,345 @@
+#!/bin/bash
+
+# GaussianFeels Evaluation and Benchmarking CLI
+# Usage: ./scripts/gf-eval [command] [options]
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Print colored output
+print_color() {
+    printf "${1}${2}${NC}\n"
+}
+
+print_banner() {
+    echo "=================================================="
+    print_color $BLUE "🧪 GaussianFeels Evaluation Suite"
+    echo "=================================================="
+}
+
+print_help() {
+    echo "Usage: $0 [command] [options]"
+    echo ""
+    echo "Commands:"
+    echo "  benchmark     Run comprehensive benchmark"
+    echo "  smoke-test    Run quick smoke tests"
+    echo "  regression    Run regression tests"
+    echo "  evaluate      Evaluate single configuration"
+    echo "  report        Generate evaluation report"
+    echo "  compare       Compare multiple results"
+    echo ""
+    echo "Options:"
+    echo "  --dataset     Dataset name (feelsight, touchnet, ycb)"
+    echo "  --object      Object name"
+    echo "  --method      Method name (default: gaussianfeels)"
+    echo "  --steps       Number of training steps (default: 100)"
+    echo "  --runs        Number of evaluation runs (default: 3)"
+    echo "  --output      Output directory (default: benchmarks)"
+    echo "  --config      Configuration file"
+    echo "  --help        Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0 benchmark --dataset feelsight --object contactdb_rubber_duck"
+    echo "  $0 evaluate --dataset touchnet --object cube --steps 50"
+    echo "  $0 smoke-test"
+    echo "  $0 report --output results/my_benchmark"
+}
+
+# Parse command line arguments
+COMMAND=""
+DATASET="feelsight"
+OBJECT="contactdb_rubber_duck"
+METHOD="gaussianfeels"
+STEPS=100
+RUNS=3
+OUTPUT="benchmarks"
+CONFIG=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        benchmark|smoke-test|regression|evaluate|report|compare)
+            COMMAND="$1"
+            shift
+            ;;
+        --dataset)
+            DATASET="$2"
+            shift 2
+            ;;
+        --object)
+            OBJECT="$2"
+            shift 2
+            ;;
+        --method)
+            METHOD="$2"
+            shift 2
+            ;;
+        --steps)
+            STEPS="$2"
+            shift 2
+            ;;
+        --runs)
+            RUNS="$2"
+            shift 2
+            ;;
+        --output)
+            OUTPUT="$2"
+            shift 2
+            ;;
+        --config)
+            CONFIG="$2"
+            shift 2
+            ;;
+        --help)
+            print_banner
+            print_help
+            exit 0
+            ;;
+        *)
+            print_color $RED "Unknown option: $1"
+            print_help
+            exit 1
+            ;;
+    esac
+done
+
+# Check if command is provided
+if [[ -z "$COMMAND" ]]; then
+    print_color $RED "Error: No command specified"
+    print_help
+    exit 1
+fi
+
+print_banner
+
+# Set up environment
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+OUTPUT_DIR="${OUTPUT}/${TIMESTAMP}"
+
+print_color $BLUE "Configuration:"
+echo "  Dataset: $DATASET"
+echo "  Object: $OBJECT" 
+echo "  Method: $METHOD"
+echo "  Steps: $STEPS"
+echo "  Runs: $RUNS"
+echo "  Output: $OUTPUT_DIR"
+echo ""
+
+# Execute commands
+case $COMMAND in
+    "benchmark")
+        print_color $YELLOW "🚀 Running comprehensive benchmark..."
+        
+        python3 -c "
+import sys
+sys.path.append('.')
+from gaussianfeels.evaluation import EvaluationSuite, BenchmarkConfig
+from gaussianfeels.datasets import DatasetRegistry
+from pathlib import Path
+
+# Setup
+registry = DatasetRegistry(Path('data'))
+suite = EvaluationSuite(registry)
+
+# Configure benchmark
+config = BenchmarkConfig(
+    methods=['$METHOD'],
+    datasets=['$DATASET'], 
+    objects=['$OBJECT'],
+    max_steps=$STEPS,
+    num_runs=$RUNS,
+    output_dir=Path('$OUTPUT_DIR')
+)
+
+# Run benchmark
+results = suite.run_benchmark(config)
+
+# Generate report
+suite.generate_report(results, Path('$OUTPUT_DIR'))
+
+print('✅ Benchmark complete!')
+print(f'📊 Results saved to: $OUTPUT_DIR')
+"
+        ;;
+        
+    "smoke-test")
+        print_color $YELLOW "🔥 Running smoke tests..."
+        
+        python3 -c "
+import sys
+sys.path.append('.')
+from gaussianfeels.evaluation import AutomatedTestSuite
+from gaussianfeels.datasets import DatasetRegistry
+from pathlib import Path
+
+# Setup
+registry = DatasetRegistry(Path('data'))
+test_suite = AutomatedTestSuite(registry)
+
+# Run tests
+results = test_suite.run_smoke_tests()
+
+# Print results
+print('\\n📋 Smoke Test Results:')
+all_passed = True
+for test, passed in results.items():
+    status = '✅' if passed else '❌'
+    print(f'  {status} {test}')
+    if not passed:
+        all_passed = False
+
+if all_passed:
+    print('\\n🎉 All smoke tests passed!')
+    exit(0)
+else:
+    print('\\n💥 Some tests failed!')
+    exit(1)
+"
+        ;;
+        
+    "regression")
+        print_color $YELLOW "🔍 Running regression tests..."
+        
+        python3 -c "
+import sys
+sys.path.append('.')
+from gaussianfeels.evaluation import AutomatedTestSuite
+from gaussianfeels.datasets import DatasetRegistry
+from pathlib import Path
+import json
+
+# Setup
+registry = DatasetRegistry(Path('data'))
+test_suite = AutomatedTestSuite(registry)
+
+# Run regression tests
+results = test_suite.run_regression_tests()
+
+# Print results
+print('\\n📊 Regression Test Results:')
+print(f\"Overall: {'✅ PASSED' if results['passed'] else '❌ FAILED'}\")
+print('')
+
+for metric, comparison in results['comparisons'].items():
+    status = '✅' if comparison['passed'] else '❌'
+    print(f\"  {status} {metric}:\")
+    print(f\"    Current: {comparison['current']:.3f}\")
+    print(f\"    Baseline: {comparison['baseline']:.3f}\")
+    print(f\"    Tolerance: {comparison['tolerance']:.1%}\")
+
+# Save results
+Path('$OUTPUT_DIR').mkdir(parents=True, exist_ok=True)
+with open(Path('$OUTPUT_DIR/regression_results.json'), 'w') as f:
+    json.dump(results, f, indent=2, default=str)
+
+exit(0 if results['passed'] else 1)
+"
+        ;;
+        
+    "evaluate")
+        print_color $YELLOW "⚡ Running single evaluation..."
+        
+        python3 -c "
+import sys
+sys.path.append('.')
+from gaussianfeels.evaluation import EvaluationSuite
+from gaussianfeels.datasets import DatasetRegistry
+from gaussianfeels.config import GaussianFeelsConfig
+from pathlib import Path
+import json
+
+# Setup
+registry = DatasetRegistry(Path('data'))
+suite = EvaluationSuite(registry)
+
+# Create config
+config = GaussianFeelsConfig(
+    dataset='$DATASET',
+    object='$OBJECT',
+    training={'max_steps': $STEPS}
+)
+
+# Run evaluation
+print('🔄 Evaluating configuration...')
+metrics = suite.evaluate_method(config, '$METHOD')
+
+# Print results
+print('\\n📊 Evaluation Results:')
+print(f'  PSNR: {metrics.psnr:.2f} dB')
+print(f'  SSIM: {metrics.ssim:.3f}')
+print(f'  Training Time: {metrics.training_time:.1f}s')
+print(f'  Memory Usage: {metrics.memory_usage:.1f} MB')
+print(f'  Gaussians: {metrics.gaussian_count:,}')
+print(f'  Convergence Steps: {metrics.convergence_steps}')
+
+# Save results
+Path('$OUTPUT_DIR').mkdir(parents=True, exist_ok=True)
+with open(Path('$OUTPUT_DIR/evaluation_results.json'), 'w') as f:
+    import dataclasses
+    json.dump(dataclasses.asdict(metrics), f, indent=2, default=str)
+
+print(f'\\n💾 Results saved to: $OUTPUT_DIR/evaluation_results.json')
+"
+        ;;
+        
+    "report")
+        print_color $YELLOW "📊 Generating evaluation report..."
+        
+        if [[ ! -d "$OUTPUT" ]]; then
+            print_color $RED "Error: Output directory $OUTPUT does not exist"
+            exit 1
+        fi
+        
+        python3 -c "
+import sys
+sys.path.append('.')
+from gaussianfeels.evaluation import EvaluationSuite
+from gaussianfeels.datasets import DatasetRegistry
+from pathlib import Path
+import json
+import glob
+
+# Setup
+registry = DatasetRegistry(Path('data'))
+suite = EvaluationSuite(registry)
+
+# Find latest benchmark results
+results_files = glob.glob('$OUTPUT/*/benchmark_*.json')
+if not results_files:
+    print('❌ No benchmark results found in $OUTPUT')
+    exit(1)
+
+latest_file = max(results_files, key=lambda x: Path(x).stat().st_mtime)
+print(f'📂 Using results from: {latest_file}')
+
+# Load results
+with open(latest_file, 'r') as f:
+    results = json.load(f)
+
+# Generate report
+output_path = Path(latest_file).parent
+suite.generate_report(results, output_path)
+
+print(f'📊 Report generated at: {output_path}/evaluation_report.html')
+"
+        ;;
+        
+    "compare")
+        print_color $YELLOW "🔄 Comparing results..."
+        print_color $YELLOW "Feature coming soon..."
+        ;;
+        
+    *)
+        print_color $RED "Unknown command: $COMMAND"
+        print_help
+        exit 1
+        ;;
+esac
+
+print_color $GREEN "✅ Command completed successfully!"

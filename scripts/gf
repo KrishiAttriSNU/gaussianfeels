@@ -1,0 +1,192 @@
+#!/bin/bash
+# GaussianFeels Unified CLI Entry Point
+# Usage: ./scripts/gf DATASET MODE MODALITY OBJECT LOG FPS RECORD VIEWER
+#
+# Unified CLI for GaussianFeels
+
+if [[ $1 == "--help" ]]; then
+    echo "Usage: ./scripts/gf DATASET MODE MODALITY OBJECT LOG FPS RECORD VIEWER"
+    echo ""
+    echo "Arguments:"
+    echo "  DATASET: string    # The dataset to be used: 'feelsight', 'feelsight_real', 'feelsight_occlusion'"
+    echo "  MODE: string       # The mode: 'slam', 'pose', 'map'"
+    echo "  MODALITY: string   # The modality: 'vitac', 'vi', 'tac'"
+    echo "  OBJECT: string     # The object: '077_rubiks_cube', 'contactdb_rubber_duck', etc."
+    echo "  LOG: string        # The log identifier: '00', '01', '02'"
+    echo "  FPS: integer       # Optimization steps per second: 1-10"
+    echo "  RECORD: integer    # Record session: '1' (yes) or '0' (no)"
+    echo "  VIEWER: string     # Viewer type: 'open3d', 'web', 'none'"
+    echo ""
+    echo "Presets:"
+    echo "  --slam-sim         # SLAM on simulation rubber duck (vitac, open3d)"
+    echo "  --pose-sim         # Pose tracking on simulation Rubik's cube (vitac, open3d)"
+    echo "  --slam-real        # SLAM on real bell pepper (vitac, open3d)"
+    echo "  --pose-real        # Pose tracking on real large dice (vitac, open3d)"
+    echo "  --three-cam        # Three-camera pose tracking on real large dice (vi, open3d)"
+    echo "  --occlusion-sim    # Pose tracking with occlusion (vitac, open3d)"
+    echo "  --web-demo         # Web-based demo mode (feelsight, pose, vitac, web)"
+    echo ""
+    echo "Examples:"
+    echo "  ./scripts/gf feelsight slam vitac contactdb_rubber_duck 00 1 1 open3d"
+    echo "  ./scripts/gf feelsight_real pose vi large_dice 01 2 0 web"
+    echo ""
+    exit 0
+elif [[ $1 = "--slam-sim" ]]; then
+    # SLAM on simulation rubber duck
+    DATASET="feelsight"
+    MODE="slam"
+    MODALITY="vitac"
+    OBJECT="contactdb_rubber_duck"
+    LOG="00"
+    FPS=1
+    RECORD=1
+    VIEWER="open3d"
+elif [[ $1 = "--pose-sim" ]]; then
+    # Pose tracking on simulation Rubik's cube
+    DATASET="feelsight"
+    MODE="pose"
+    MODALITY="vitac"
+    OBJECT="077_rubiks_cube"
+    LOG="00"
+    FPS=1
+    RECORD=1
+    VIEWER="open3d"
+elif [[ $1 = "--slam-real" ]]; then
+    # SLAM on real bell pepper
+    DATASET="feelsight_real"
+    MODE="slam"
+    MODALITY="vitac"
+    OBJECT="bell_pepper"
+    LOG="00"
+    FPS=1
+    RECORD=1
+    VIEWER="open3d"
+elif [[ $1 = "--pose-real" ]]; then
+    # Pose tracking on real large dice
+    DATASET="feelsight_real"
+    MODE="pose"
+    MODALITY="vitac"
+    OBJECT="large_dice"
+    LOG="00"
+    FPS=1
+    RECORD=1
+    VIEWER="open3d"
+elif [[ $1 = "--three-cam" ]]; then
+    # Three-camera pose tracking
+    DATASET="feelsight_real"
+    MODE="pose"
+    MODALITY="vi"
+    OBJECT="large_dice"
+    LOG="00"
+    FPS=1
+    RECORD=1
+    VIEWER="open3d"
+    EXTRA_ARGS="--three-camera-mode"
+elif [[ $1 = "--occlusion-sim" ]]; then
+    # Pose tracking with occlusion
+    DATASET="feelsight_occlusion"
+    MODE="pose"
+    MODALITY="vitac"
+    OBJECT="077_rubiks_cube"
+    LOG="00"
+    FPS=1
+    RECORD=1
+    VIEWER="open3d"
+elif [[ $1 = "--web-demo" ]]; then
+    # Web-based demo mode
+    DATASET="feelsight"
+    MODE="pose"
+    MODALITY="vitac"
+    OBJECT="contactdb_rubber_duck"
+    LOG="00"
+    FPS=2
+    RECORD=1
+    VIEWER="web"
+else
+    if [ $# -lt 8 ]; then
+        echo "Error: Missing arguments."
+        echo "Usage: $0 DATASET MODE MODALITY OBJECT LOG FPS RECORD VIEWER"
+        echo "You provided $# arguments, but 8 are required."
+        echo "Use --help for more information."
+        exit 1
+    fi
+    DATASET=$1
+    MODE=$2
+    MODALITY=$3
+    OBJECT=$4
+    LOG=$5
+    FPS=$6
+    RECORD=$7
+    VIEWER=$8
+    array=($@)
+    len=${#array[@]}
+    EXTRA_ARGS=${array[@]:8:$len}
+fi
+
+# Validation
+if [[ ${DATASET} != "feelsight" && ${DATASET} != "feelsight_real" && ${DATASET} != "feelsight_occlusion" ]]; then
+    echo "Error: Invalid DATASET. Options are 'feelsight', 'feelsight_real', 'feelsight_occlusion'."
+    exit 1
+elif [[ ${MODE} != "slam" && ${MODE} != "pose" && ${MODE} != "map" ]]; then
+    echo "Error: Invalid MODE. Options are 'slam', 'pose', 'map'."
+    exit 1
+elif [[ ${MODALITY} != "vitac" && ${MODALITY} != "vi" && ${MODALITY} != "tac" ]]; then
+    echo "Error: Invalid MODALITY. Options are 'vitac', 'vi', 'tac'."
+    exit 1
+elif [[ ! ${FPS} =~ ^[0-9]+$ ]] || [[ ${FPS} -lt 1 ]] || [[ ${FPS} -gt 10 ]]; then
+    echo "Error: Invalid FPS. Must be integer between 1-10."
+    exit 1
+elif [[ ${RECORD} != 0 && ${RECORD} != 1 ]]; then
+    echo "Error: Invalid RECORD. Options are '0' (no) or '1' (yes)."
+    exit 1
+elif [[ ${VIEWER} != "open3d" && ${VIEWER} != "web" && ${VIEWER} != "none" ]]; then
+    echo "Error: Invalid VIEWER. Options are 'open3d', 'web', 'none'."
+    exit 1
+fi
+
+echo "Starting GaussianFeels Pipeline"
+echo "=================================="
+echo "Dataset: ${DATASET}"
+echo "Mode: ${MODE}"
+echo "Modality: ${MODALITY}"
+echo "Object: ${OBJECT}"
+echo "Log: ${LOG}"
+echo "FPS: ${FPS}"
+echo "Record: ${RECORD}"
+echo "Viewer: ${VIEWER}"
+echo "Extra Args: ${EXTRA_ARGS}"
+echo ""
+
+# Set up output directory
+TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+OUTPUT_DIR="outputs/${TIMESTAMP}/${OBJECT}/${LOG}/${MODE}_${MODALITY}"
+mkdir -p ${OUTPUT_DIR}
+
+echo "Output Directory: ${OUTPUT_DIR}"
+echo ""
+
+# Build configuration arguments
+CONFIG_ARGS=""
+CONFIG_ARGS="${CONFIG_ARGS} --dataset=${DATASET}"
+CONFIG_ARGS="${CONFIG_ARGS} --mode=${MODE}"
+CONFIG_ARGS="${CONFIG_ARGS} --modality=${MODALITY}"
+CONFIG_ARGS="${CONFIG_ARGS} --object=${OBJECT}"
+CONFIG_ARGS="${CONFIG_ARGS} --log=${LOG}"
+CONFIG_ARGS="${CONFIG_ARGS} --fps=${FPS}"
+CONFIG_ARGS="${CONFIG_ARGS} --viewer=${VIEWER}"
+CONFIG_ARGS="${CONFIG_ARGS} --output-dir=${OUTPUT_DIR}"
+
+if [ $RECORD -eq 1 ]; then
+    CONFIG_ARGS="${CONFIG_ARGS} --record"
+fi
+
+if [ ! -z "${EXTRA_ARGS}" ]; then
+    CONFIG_ARGS="${CONFIG_ARGS} ${EXTRA_ARGS}"
+fi
+
+echo "Launching GaussianFeels with configuration:"
+echo "python -m gaussianfeels.main ${CONFIG_ARGS}"
+echo ""
+
+# Launch the main GaussianFeels pipeline
+python -m gaussianfeels.main ${CONFIG_ARGS}

@@ -1,0 +1,123 @@
+# Rich visualization suite for GaussianFeels
+# Real-time Gaussian splatting visualization and analysis
+
+# Visualization framework
+enable_rich_viz: true
+viz_directory: "visualization"  # Dedicated visualization directory
+backend: "viser"  # Primary visualization backend (viser|open3d|matplotlib)
+
+# Real-time visualization tools
+tools:
+  # Gaussian splatting visualization
+  gaussian_cloud_viewer: true  # 3D Gaussian cloud visualization
+  splat_renderer: true  # Real-time splat rendering
+  opacity_heatmap: true  # Gaussian opacity visualization
+  scale_visualization: true  # Gaussian scale distribution
+  
+  # Sensor visualization
+  tactile_depth_viewer: true  # Tactile depth map visualization
+  contact_mask_overlay: true  # Contact detection overlay
+  multi_camera_viewer: true  # Multi-camera view grid
+  
+  # Fusion visualization  
+  point_cloud_fusion: true  # Fused point cloud display
+  modality_comparison: true  # Side-by-side modality comparison
+  fusion_confidence_map: true  # Fusion confidence visualization
+  
+  # Pose and trajectory
+  object_pose_viewer: true  # Object pose visualization
+  trajectory_trail: true  # Object trajectory over time
+  coordinate_frame_display: true  # Coordinate system visualization
+  
+  # Performance monitoring
+  thread_timeline: true  # Thread execution timeline
+  memory_usage_graph: true  # Real-time memory tracking
+  fps_counter: true  # Frame rate display
+  
+# Interactive GUI components
+gui:
+  control_panel: true  # Parameter control panel
+  
+  # Gaussian controls
+  gaussian_controls:
+    opacity_slider: [0.0, 1.0]  # Opacity threshold control
+    scale_filter: [0.0, 0.1]  # Scale filtering range
+    point_size_control: [0.5, 5.0]  # Rendering point size
+    sh_degree_selector: [0, 3]  # SH degree selection
+  
+  # Rendering controls
+  render_controls:
+    camera_fov: [30, 120]  # Field of view control
+    near_far_planes: true  # Near/far plane adjustment
+    background_color: true  # Background color picker
+    render_mode: ["gaussian", "points", "wireframe"]
+  
+  # Data controls
+  data_controls:
+    frame_slider: true  # Frame navigation
+    playback_speed: [0.1, 5.0]  # Playback speed control
+    modality_toggles: true  # Enable/disable modalities
+    
+# Analysis visualization
+analysis:
+  # Gaussian statistics
+  gaussian_histogram: true  # Parameter distributions
+  density_map_3d: true  # 3D density visualization
+  gradient_flow: true  # Gradient visualization
+  
+  # Quality metrics
+  psnr_graph: true  # PSNR over time
+  loss_curves: true  # Training loss visualization
+  per_gaussian_error: true  # Error heat map
+  
+  # Tactile analysis
+  tactile_force_map: true  # Force distribution
+  contact_evolution: true  # Contact area over time
+  depth_error_map: true  # Depth prediction error
+  
+# Debug visualization
+debug:
+  # Gaussian debugging
+  nan_gaussian_highlight: true  # Highlight problematic Gaussians
+  gradient_magnitude: true  # Gradient magnitude visualization
+  split_clone_visualization: true  # Show split/clone operations
+  
+  # Memory debugging
+  memory_allocation_map: true  # Memory usage by component
+  spatial_hash_grid: true  # Spatial acceleration structure
+  
+  # Thread debugging
+  queue_depth_monitor: true  # Thread queue visualization
+  synchronization_timeline: true  # Thread sync events
+  
+# Export capabilities
+export:
+  # Image/Video export
+  screenshot_hotkey: "s"  # Screenshot key binding
+  video_recording: true  # Record visualization
+  video_format: "mp4"
+  video_fps: 30
+  
+  # 3D export
+  export_gaussians: true  # Export Gaussian parameters
+  export_format: ["ply", "npz", "json"]
+  export_point_cloud: true  # Export as point cloud
+  
+  # Report generation
+  generate_html_report: true  # Interactive HTML report
+  include_statistics: true  # Include statistics
+  embed_visualizations: true  # Embed 3D viewers
+  
+# Performance settings
+performance:
+  update_rate_hz: 30  # Visualization update rate
+  downsample_large_clouds: true  # Downsample for display
+  downsample_threshold: 100000  # Downsample above this
+  use_gpu_rendering: true  # GPU-accelerated rendering
+  
+# Layout configuration
+layout:
+  default_layout: "split_view"  # default|split_view|grid
+  window_size: [1920, 1080]
+  dpi_scaling: "auto"
+  theme: "dark"  # dark|light|auto

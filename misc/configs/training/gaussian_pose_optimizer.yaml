@@ -1,0 +1,139 @@
+# Gaussian Splatting Pose Optimization Configuration
+# Replaces Theseus-based optimization with rasterizer gradients
+
+optimizer:
+  type: "gaussian_splatting"  # "theseus" or "gaussian_splatting"
+  
+  # Core optimization parameters
+  max_iterations: 10
+  convergence_threshold: 1.0e-6
+  lm_damping_init: 1.0e-3
+  lm_damping_factor: 2.0
+  step_size_translation: 0.01
+  step_size_rotation: 0.01
+  
+  # Multi-term cost weights
+  weights:
+    vision: 1.0
+    depth: 1.0
+    tactile: 2.0
+    icp: 0.5
+    sdf: 0.1
+    regularization: 0.01
+  
+  # Vision/rendering parameters
+  vision:
+    loss_type: "l1_ssim"  # "l1", "l2", "l1_ssim"
+    ssim_weight: 0.15
+    pixel_sampling_ratio: 0.3  # Sample 30% of pixels for efficiency
+    coarse_to_fine: true
+    pyramid_levels: 3
+    
+  # Tactile constraint parameters
+  tactile:
+    distance_threshold: 0.005  # 5mm
+    surface_method: "gaussian_distance"  # "gaussian_distance", "sdf"
+    weight_scaling: "contact_quality"  # "uniform", "contact_quality"
+    
+  # ICP parameters
+  icp:
+    enable: true
+    fitness_threshold: 0.5
+    inlier_rmse_threshold: 0.01
+    translation_threshold: 0.05  # 5cm
+    rotation_threshold: 15.0  # 15 degrees
+    point_sampling_ratio: 0.1  # Sample 10% of points
+    
+  # SDF constraint parameters (future)
+  sdf:
+    enable: false
+    truncation_distance: 0.02
+    surface_tolerance: 0.001
+    
+  # Performance optimization
+  performance:
+    enable_gpu_acceleration: true
+    batch_residual_computation: true
+    jacobian_computation_method: "autograd"  # "autograd", "finite_diff"
+    parallel_sensor_processing: true
+    
+    # Coarse-to-fine optimization
+    coarse_to_fine:
+      enable: true
+      pyramid_levels: 3
+      level_scales: [0.25, 0.5, 1.0]
+      iterations_per_level: [3, 3, 4]
+      pixel_sampling_per_level: [0.1, 0.2, 0.3]
+      early_termination: true
+      convergence_threshold_per_level: [1.0e-4, 1.0e-5, 1.0e-6]
+  
+  # Gaussian rendering configuration
+  rendering:
+    image_height: 480
+    image_width: 640
+    near_plane: 0.01
+    far_plane: 10.0
+    sh_degree: 3
+    white_background: false
+    alpha_threshold: 1.0e-4
+    enable_lod: true
+    lod_levels: 3
+    
+  # Debug and profiling
+  debug:
+    enable: false
+    save_intermediate_renders: false
+    jacobian_checking: false
+    profile_optimization: true
+    log_convergence: true
+    visualize_residuals: false
+    
+# Sensor-specific configurations
+sensors:
+  realsense:
+    type: "rgb_d"
+    intrinsics:
+      fx: 525.0
+      fy: 525.0
+      cx: 320.0
+      cy: 240.0
+    
+  digit:
+    type: "tactile"
+    contact_threshold: 0.1  # Newtons
+    surface_normal_estimation: true
+    temporal_filtering: true
+    
+# Training integration
+training:
+  pose_optimization_frequency: 5  # Every N frames
+  online_gaussian_updates: true
+  pose_loss_weight: 0.1
+  
+  # Curriculum learning
+  curriculum:
+    enable: true
+    stages:
+      - name: "coarse_vision"
+        iterations: [0, 1000]
+        weights: {vision: 1.0, depth: 0.5, tactile: 0.0, icp: 0.0}
+      - name: "add_tactile"
+        iterations: [1000, 3000]
+        weights: {vision: 1.0, depth: 0.8, tactile: 1.0, icp: 0.0}
+      - name: "full_multimodal"
+        iterations: [3000, -1]
+        weights: {vision: 1.0, depth: 1.0, tactile: 2.0, icp: 0.5}
+
+# Evaluation metrics
+evaluation:
+  pose_metrics:
+    - "translation_rmse"
+    - "rotation_rmse" 
+    - "trajectory_error"
+    - "convergence_rate"
+    - "optimization_time"
+  
+  comparison_baselines:
+    - "theseus_original"
+    - "bundle_adjustment"
+    - "visual_odometry"

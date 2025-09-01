@@ -1,0 +1,94 @@
+# Tactile Transformer (TouchVIT) Training Configuration for GaussianFeels
+# Adapted for gaussianfeels architecture
+
+# General training settings
+General:
+  # Model configuration
+  type: "full"  # "full" (depth+seg), "depth", "segmentation"
+  model_timm: "vit_small_patch16_224.dino"  # Pre-trained ViT model
+  emb_dim: 384  # ViT embedding dimension (384 for small, 768 for base, 1024 for large)
+  resample_dim: 128  # Reassembly dimension
+  patch_size: 16  # ViT patch size
+  hooks: [2, 5, 8, 11]  # ViT layers to extract features from (0-indexed)
+  read: "projection"  # How to read ViT features: "ignore", "add", "projection"
+  
+  # Training hyperparameters
+  device: "cuda"
+  epochs: 300
+  batch_size: 32
+  num_workers: 4
+  seed: 42
+  
+  # Optimization
+  optim: "adam"  # "adam" or "sgd"
+  lr_backbone: 1.0e-5  # Low learning rate for pre-trained ViT backbone
+  lr_scratch: 1.0e-4   # Higher learning rate for new layers
+  momentum: 0.9  # Only used if optim="sgd"
+  
+  # Loss functions
+  loss_depth: "ssi"  # "mse" or "ssi" (scale-shift invariant)
+  loss_segmentation: "ce"  # "ce" (cross entropy)
+  
+  # Model paths
+  path_model: "./models/tactile_transformer"  # Will be overridden by CLI
+  
+# Dataset configuration
+Dataset:
+  name: "tactile_depth"
+  
+  # Data paths (relative to path_dataset)
+  paths:
+    path_dataset: "/home/krishi/gaussianfeels/data/tactile_training"
+    path_images: "tactile_images"
+    path_depths: "gt_heightmaps" 
+    path_segmentations: "gt_contactmasks"
+  
+  # File extensions
+  extensions:
+    ext_images: ".jpg"
+    ext_depths: ".png"
+    ext_segmentations: ".png"
+  
+  # Data splits (must sum to 1.0)
+  splits:
+    split_train: 0.7
+    split_val: 0.2
+    split_test: 0.1
+  
+  # Data transforms
+  transforms:
+    resize: [224, 224]  # [height, width]
+  
+  # Class definitions for segmentation
+  classes:
+    "0":  # Background
+      name: "background"
+      color: [0, 0, 0]
+    "1":  # Contact
+      name: "contact" 
+      color: [255, 255, 255]
+
+# Weights & Biases logging
+wandb:
+  enable: false  # Set to true to enable W&B logging
+  project: "gaussianfeels_tactile_transformer"
+  username: null  # Will use default W&B username
+  mode: "online"  # "online", "offline", "disabled"
+  
+  # Image logging settings
+  images_to_show: 5
+  im_w: 256
+  im_h: 256
+
+# Hydra configuration
+defaults:
+  - _self_
+
+hydra:
+  run:
+    dir: ./outputs/tactile_transformer/${now:%Y-%m-%d_%H-%M-%S}
+  sweep:
+    dir: ./outputs/tactile_transformer/sweeps
+    subdir: ${now:%Y-%m-%d_%H-%M-%S}
+  job:
+    chdir: true

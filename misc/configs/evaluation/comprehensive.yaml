@@ -1,0 +1,108 @@
+# Comprehensive evaluation suite for GaussianFeels
+# Object-centric Gaussian splatting evaluation framework
+
+# Evaluation framework
+enable_comprehensive_suite: true
+evaluation_name: "gaussianfeels_eval"
+
+# Gaussian-specific metrics
+metrics:
+  gaussian_quality:
+    - "gaussian_count"  # Number of active Gaussians
+    - "memory_usage_mb"  # Memory consumption
+    - "opacity_distribution"  # Distribution of opacity values
+    - "scale_distribution"  # Distribution of Gaussian scales
+    - "densification_rate"  # Rate of Gaussian creation
+    - "pruning_rate"  # Rate of Gaussian removal
+  
+  reconstruction_quality:
+    - "psnr"  # Peak Signal-to-Noise Ratio
+    - "ssim"  # Structural Similarity Index
+    - "lpips"  # Learned Perceptual Image Patch Similarity
+    - "chamfer_distance"  # Point cloud distance
+    - "f_score"  # F-score at various thresholds
+    - "iou_3d"  # 3D Intersection over Union
+  
+  tactile_fusion:
+    - "tactile_reconstruction_error"  # Tactile depth prediction accuracy
+    - "contact_mask_iou"  # Contact detection accuracy
+    - "fusion_consistency"  # Tactile-visual fusion consistency
+    - "modality_contribution"  # Contribution of each modality
+  
+  pose_accuracy:
+    - "absolute_trajectory_error"  # ATE for pose tracking
+    - "relative_pose_error"  # RPE for incremental poses
+    - "translation_error_mm"  # Translation error in millimeters
+    - "rotation_error_deg"  # Rotation error in degrees
+  
+  rendering_quality:
+    - "render_fps"  # Rendering frame rate
+    - "splat_count"  # Number of splats per frame
+    - "depth_accuracy"  # Rendered depth accuracy
+    - "normal_consistency"  # Surface normal consistency
+    
+  performance:
+    - "data_thread_hz"  # Data processing frequency
+    - "optimizer_hz"  # Optimization frequency
+    - "memory_efficiency"  # MB per 1k Gaussians
+    - "interpolation_smoothness"  # 1kHz interpolation quality
+    - "queue_utilization"  # Thread queue usage
+    - "gpu_utilization"  # GPU usage percentage
+
+# Evaluation modes
+modes:
+  real_time_evaluation: true  # Evaluate during live operation
+  offline_evaluation: true  # Post-processing evaluation
+  ablation_studies: true  # Component ablation tests
+  
+# Ablation studies
+ablations:
+  - "tactile_only"  # Only tactile input
+  - "vision_only"  # Only visual input
+  - "no_temporal"  # Disable temporal consistency
+  - "fixed_gaussians"  # No densification/pruning
+  - "no_interpolation"  # Disable 1kHz interpolation
+  
+# Benchmarking
+benchmarking:
+  datasets:
+    - "feelsight"  # FeelSight dataset
+    - "feelsight_real"  # Real sensor data
+    - "feelsight_occlusion"  # Occlusion handling
+    - "custom"  # Custom recorded data
+  
+  baselines:
+    - "neural_fields"  # Compare against neural fields
+    - "vanilla_3dgs"  # Standard 3D Gaussian Splatting
+    - "tsdf_fusion"  # Traditional TSDF fusion
+  
+  scenarios:
+    - "static_object"  # Static object reconstruction
+    - "dynamic_manipulation"  # Object being manipulated
+    - "multi_contact"  # Multiple simultaneous contacts
+    - "occlusion_heavy"  # Heavy occlusion scenarios
+  
+# Output configuration
+results:
+  output_dir: "outputs/evaluation/"
+  save_detailed_metrics: true
+  save_per_frame_metrics: true
+  generate_plots: true
+  plot_formats: ["png", "pdf", "svg"]
+  export_gaussians: true  # Export Gaussian parameters
+  export_point_clouds: true  # Export fused point clouds
+  export_renderings: true  # Export rendered views
+  create_summary_report: true  # LaTeX/Markdown report
+  
+# Visualization during evaluation
+visualization:
+  live_metrics_dashboard: true
+  gaussian_heatmaps: true
+  fusion_quality_maps: true
+  error_visualizations: true
+  
+# Statistical analysis
+statistics:
+  confidence_intervals: true
+  significance_testing: true
+  bootstrapping_iterations: 1000

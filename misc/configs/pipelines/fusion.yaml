@@ -1,0 +1,108 @@
+# ================================
+# FUSION PIPELINE CONFIGURATION
+# ================================
+# Based on NeuralFeels architecture but adapted for Gaussian Splatting
+
+defaults:
+  - _self_
+  - camera: realsense
+  - tactile: digit
+  - fusion: gaussian_splat
+
+# Command line overrides (like NeuralFeels)
+# Usage: python fusion_only_test.py --config configs/fusion.yaml
+#        --data-path /path/to/data/folder --predictor vit --max-frames 50 --out outputs/fusion_test
+
+hydra:
+  job:
+    chdir: true
+  run:
+    dir: ${out}
+
+# Data paths (can be overridden via command line)
+out: outputs/fusion_test
+data_path: ???  # Must be provided via --data-path (contains both realsense/ and allegro/)
+max_frames: 50
+predictor: gt  # Can be overridden via --predictor
+
+# ================================
+# CAMERA CONFIGURATION  
+# ================================
+camera:
+  data:
+    dataset_path: ${data_path}  # Main folder with data.pkl
+    
+  processing:
+    predictor_type: camera
+    
+  sampling:
+    n_rays: 400  # Similar to NeuralFeels vision sensor
+    depth_range: [0.3, 1.0]
+    
+  gaussian:
+    initial_scale: 0.01  # Initial Gaussian scale
+    density_neighbors: 4  # Neighbors for density estimation
+    opacity_min: 0.1
+    opacity_max: 1.0
+
+# ================================  
+# TACTILE CONFIGURATION
+# ================================
+tactile:
+  data:
+    dataset_path: ${data_path}  # Main folder with data.pkl
+    
+  processing:
+    predictor_type: ${predictor}  # gt, vit, etc.
+    
+  touch_depth:
+    model_type: ${predictor}
+    confidence_threshold: 0.1
+    
+  sampling:
+    n_rays: 5  # Similar to NeuralFeels tactile sensor
+    depth_range: [-0.01, 0.05]
+    max_contacts_per_frame: 100
+    
+  sensor:
+    digit_size: 0.022  # Physical DIGIT sensor size in meters
+
+# ================================
+# FUSION CONFIGURATION  
+# ================================
+fusion:
+  backend: gaussian_splatting  # vs nerf for NeuralFeels
+  
+  # Gaussian Splatting fusion parameters
+  splat:
+    # Zone of influence parameters
+    k_sigma: 3.0  # Standard deviations for influence zone
+    k_nearest: 20  # Nearest neighbors to consider
+    
+    # Loss weighting (similar to NeuralFeels loss ratios)
+    lambda_pos_base: 1.0  # Base weight for position loss
+    lambda_cov_base: 0.5  # Base weight for covariance loss
+    lambda_reg: 1e-6  # Regularization weight
+    
+    # Numerical stability
+    epsilon: 1e-8  # Floor value for stability
+    
+    # Fusion strategy
+    fusion_mode: proximity_based  # proximity_based, global, incremental
+    confidence_weighting: true
+
+# ================================
+# OUTPUT CONFIGURATION
+# ================================
+output:
+  save_ply: true
+  save_analysis: true
+  render_views: true
+  
+  # File naming
+  filename_prefix: fusion
+  
+  # PLY export options
+  export_sources: true  # Mark camera vs tactile points
+  export_colors: true
+  export_normals: false

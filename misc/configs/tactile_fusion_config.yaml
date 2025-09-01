@@ -1,0 +1,106 @@
+# Tactile-Camera Fusion Hydra Configuration for gaussianfeels
+# Hydra configuration management for tactile-camera fusion system
+# Clean configuration system for multi-modal fusion
+
+defaults:
+  - training: tactile_fusion_training
+  - model: gaussian_field
+  - sensors: multi_modal
+  - evaluation: comprehensive
+  - visualization: rich_viz
+  - pose_optimization: theseus_optimizer
+  - _self_
+
+# Main configuration for tactile-camera fusion
+experiment_name: "gfs2_tactile_fusion"
+run_name: "${experiment_name}_${now:%Y%m%d_%H%M%S}"
+
+# Device and precision settings
+device: "cuda"
+precision: "full"  # Full precision for accurate reconstruction
+coordinate_system: "world"  # World coordinates for global consistency
+
+# Data settings for tactile-camera fusion
+data:
+  dataset_path: null
+  batch_processing: true  # Batch dataset processing for efficiency
+  assume_valid_calibration: true  # Assumes proper sensor calibration
+  world_coordinate_processing: true  # Process in world coordinates
+
+# Training settings for neural network optimization
+training:
+  type: "backpropagation"  # Neural network optimization
+  inference_per_query: true  # Direct inference without interpolation
+  unbounded_complexity: true  # No artificial complexity limits
+  full_precision: true  # FP32 for all parameters for accuracy
+
+# Loss functions for multi-modal fusion
+loss:
+  rgb_weight: 1.0
+  depth_weight: 0.1
+  tactile_weight: 1.0
+  eikonal_weight: 0.1  # Surface smoothness regularization
+  sdf_weight: 1.0  # Signed distance field losses
+
+# Multi-modal fusion configuration
+fusion:
+  mode: "tactile_first"  # Default fusion mode
+  coordinate_system: "world"  # Global coordinate system
+  separate_tactile_kinematics: true  # Separate tactile processing pipeline
+
+# Sensor configuration
+sensors:
+  assume_valid_calibration: true  # Assumes proper sensor calibration
+  world_coordinate_depth: true  # Process depth in world coordinates
+  
+# Spatial queries configuration
+spatial:
+  optimization_type: "o_n_queries"  # O(n) spatial queries for accuracy
+  disable_spatial_hash: true  # Direct queries without spatial acceleration
+
+# Comprehensive evaluation suite
+evaluation:
+  enable_comprehensive_suite: true
+  metrics:
+    - "f_score"
+    - "chamfer_distance" 
+    - "add_s_pose"
+    - "reconstruction_quality"
+    - "accuracy_precision"
+  offline_evaluation: true  # Batch evaluation for thoroughness
+  
+# Rich visualization suite
+visualization:
+  enable_rich_viz: true
+  viz_directory: "viz"  # Dedicated visualization directory
+  interactive_gui: true  # Interactive debugging interface
+  plotting_utilities: true  # Detailed plotting capabilities
+
+# Pose optimization with Theseus
+pose_optimization:
+  enable_theseus: true  # Theseus non-linear optimization
+  method: "nonlinear_least_squares"
+  
+# Memory and performance configuration
+memory:
+  # Unbounded memory approach for maximum quality
+  bounded_memory: false
+  bounded_gaussians: false  
+  automatic_fallbacks: false  # No fallback mechanisms for consistency
+  
+# Output and logging
+output:
+  log_level: "INFO"
+  save_checkpoints: true
+  checkpoint_interval: 1000
+  
+# Hydra configuration
+hydra:
+  job:
+    name: ${experiment_name}
+    chdir: true
+  run:
+    dir: outputs/${run_name}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}

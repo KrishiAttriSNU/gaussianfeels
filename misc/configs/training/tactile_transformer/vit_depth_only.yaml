@@ -1,0 +1,18 @@
+# Tactile Transformer - Depth Estimation Only Configuration
+
+# @package _global_
+defaults:
+  - vit_training
+
+# Override for depth-only training
+General:
+  type: "depth"
+  loss_segmentation: "none"  # No segmentation loss
+  
+# Adjusted hyperparameters for depth-only
+  lr_scratch: 5.0e-5  # Slightly lower for focused task
+  batch_size: 48     # Can use larger batches
+
+# W&B project override
+wandb:
+  project: "gaussianfeels_tactile_depth"

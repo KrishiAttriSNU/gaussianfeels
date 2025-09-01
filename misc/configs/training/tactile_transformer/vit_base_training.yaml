@@ -1,0 +1,22 @@
+# Tactile Transformer - ViT Base Model Configuration
+
+# @package _global_
+defaults:
+  - vit_training
+
+# Override for ViT-Base model
+General:
+  model_timm: "vit_base_patch16_224.dino"
+  emb_dim: 768  # Base model embedding dimension
+  hooks: [2, 5, 8, 11]  # Adjusted for base model depth
+  resample_dim: 256  # Larger reassembly dimension for base model
+  
+  # Adjusted hyperparameters for larger model
+  batch_size: 24  # Smaller batch for larger model
+  lr_backbone: 5.0e-6  # Even lower for larger pre-trained model
+  lr_scratch: 5.0e-5   # Adjusted for stability
+  epochs: 200  # Fewer epochs since larger model learns faster
+
+# W&B project override
+wandb:
+  project: "gaussianfeels_tactile_base"

@@ -1,0 +1,115 @@
+# GaussianFeels training configuration
+# Gaussian splatting optimization with tactile-visual fusion
+
+# Training type - Gaussian parameter optimization
+type: "gaussian_optimization"
+optimizer: "adam"  # Per-parameter Adam optimizer
+
+# Learning rates for Gaussian parameters
+learning_rates:
+  position: 0.00016  # 3D position learning rate
+  rotation: 0.001  # Quaternion rotation learning rate  
+  scale: 0.005  # Log-scale learning rate
+  opacity: 0.05  # Opacity/alpha learning rate
+  sh_coefficients: 0.0025  # Spherical harmonics learning rate
+
+# Scheduler configuration
+scheduler:
+  type: "exponential_decay"
+  position_final: 0.0000016  # Final position LR
+  rotation_final: 0.00001  # Final rotation LR
+  scale_final: 0.00005  # Final scale LR
+  opacity_final: 0.0005  # Final opacity LR
+  sh_final: 0.000025  # Final SH LR
+  decay_iterations: 30000
+  min_learning_rate: 1e-8
+
+# Adam optimizer parameters
+adam:
+  beta1: 0.9
+  beta2: 0.999
+  eps: 1e-8
+  weight_decay: 0.0
+
+# Gradient handling
+gradient:
+  clip_threshold: 1.0  # Gradient clipping
+  accumulation_steps: 1  # No gradient accumulation
+  nan_detection: true  # Detect and handle NaN gradients
+  inf_detection: true  # Detect and handle Inf gradients
+
+# Training schedule
+schedule:
+  max_iterations: 30000
+  warmup_iterations: 500  # Reduced warmup for Gaussians
+  
+  # Densification and pruning schedule
+  densify_from_iter: 500
+  densify_until_iter: 15000
+  densify_interval: 100
+  
+  # Opacity reset schedule
+  opacity_reset_interval: 3000
+  
+  # Evaluation schedule
+  eval_interval: 1000
+  checkpoint_interval: 5000
+
+# Loss computation for Gaussian splatting
+loss:
+  # Rendering losses
+  l1_weight: 0.8  # L1 color loss
+  ssim_weight: 0.2  # SSIM perceptual loss
+  
+  # Depth supervision
+  depth_loss_weight: 0.1  # Depth supervision weight
+  depth_loss_type: "l1"  # l1|l2|huber
+  
+  # Tactile-specific losses
+  tactile_depth_weight: 0.3  # Tactile depth consistency
+  contact_mask_weight: 0.2  # Contact mask alignment
+  tactile_consistency_weight: 0.1  # Multi-frame consistency
+  
+  # Regularization
+  opacity_regularization: 0.01  # Encourage transparency
+  scale_regularization: 0.001  # Prevent extreme scales
+  
+  # Multi-modal balancing
+  adaptive_weighting: true  # Dynamically adjust modal weights
+  modality_balance_factor: 0.5  # Balance factor
+
+# Densification and pruning thresholds
+densification:
+  gradient_threshold: 0.0002  # Position gradient threshold
+  percent_dense: 0.01  # Top 1% by gradient
+  scene_extent: 1.0  # Scene bounding extent
+  
+  # Splitting criteria
+  scale_threshold: 0.02  # Maximum scale before split
+  clone_scale_factor: 0.8  # Scale reduction on clone
+  
+  # Pruning criteria
+  opacity_threshold: 0.005  # Minimum opacity
+  scale_threshold_prune: 0.5  # Maximum scale
+  view_count_threshold: 3  # Minimum view count
+
+# Memory management during training
+memory:
+  max_gaussians: 300000  # Hard limit on Gaussians
+  target_gaussians: 200000  # Target for adaptive pruning
+  aggressive_prune_threshold: 250000  # Aggressive pruning trigger
+  
+# Inference configuration
+inference:
+  interpolation_mode: "quaternion_slerp"  # Smooth rotation interpolation
+  position_interpolation: "cubic"  # Smooth position interpolation
+  render_frequency: 60  # Target render FPS
+  no_grad_inference: true  # Disable gradients during inference
+  
+# Logging and debugging
+logging:
+  log_interval: 100
+  image_log_interval: 500
+  metric_buffer_size: 100
+  track_gradient_norms: true
+  save_intermediate_checkpoints: true

@@ -1,0 +1,70 @@
+# Multi-modal sensor configuration for GaussianFeels
+# Object-centric Gaussian splatting with tactile-visual fusion
+
+# Sensor processing approach (GaussianFeels 3-thread architecture)
+processing_mode: "fused"  # Fused tactile-visual processing in object-centric coordinates
+thread_architecture: "3-thread"  # Data (100Hz), Render (30-60 FPS), Optimizer (10-15 Hz)
+
+# Calibration handling
+calibration:
+  validate_on_init: true  # Validate calibration at initialization
+  fallback_to_defaults: false  # Graceful degradation with default parameters
+  auto_calibrate: false  # Manual calibration required for accuracy
+  calibration_directory: "configs/calibration/"
+
+# Depth processing (Object-centric approach)
+depth:
+  coordinate_system: "object"  # Object-centric coordinate system
+  transform_to_object: true  # pc_world → pc_obj per frame
+  depth_scale: 0.001  # Convert depth to meters
+  max_depth: 5.0  # Maximum depth in meters
+  min_depth: 0.1  # Minimum depth in meters
+  
+# Tactile sensors
+tactile:
+  integrated_processing: true  # Integrated with visual data
+  sensor_types: ["digit", "gelsight", "tacto"]  # Supported sensor types
+  prediction_modes: ["vit", "gt"]  # Available prediction modes (matching NeuralFeels)
+  default_mode: "vit"  # Default tactile depth prediction
+  depth_mask_enforcement: true  # Mandatory depth×mask rule
+  point_reduction: 0.5  # 50% point sampling for ViT mode
+  max_points_per_frame: 15000  # Maximum tactile points
+  
+# Vision sensors  
+vision:
+  sensor_types: ["realsense", "azure_kinect", "zed"]
+  default_sensor: "realsense"
+  segmentation: "sam"  # Segment Anything Model
+  max_points_per_frame: 50000  # Maximum vision points
+  point_cloud_filtering:
+    statistical_outlier_removal: true
+    voxel_downsampling: true
+    voxel_size: 0.005  # 5mm voxel size
+  
+# Fusion configuration
+fusion:
+  integration_mode: "concurrent"  # concurrent|tactile_first|vision_first
+  tactile_weight: 0.8  # Tactile primary weight
+  vision_weight: 0.2  # Vision secondary weight
+  temporal_consistency: true  # Enable temporal validation
+  pose_delta_limit: 1.0  # Maximum pose change per frame (meters)
+  
+# Coordinate transforms
+transforms:
+  use_object_centric: true  # Object-centric coordinates
+  track_object_pose: true  # Track T_WO(i) per frame
+  validate_transforms: true  # Validate transformation matrices
+  interpolation_frequency: 1000  # 1kHz pose interpolation
+  
+# Memory constraints
+memory:
+  enforce_limits: true  # Enforce memory constraints
+  max_active_gaussians: 300000  # Maximum 300k Gaussians
+  target_memory_mb: 158  # Target memory usage
+  
+# Performance targets
+performance:
+  data_thread_hz: 100  # 100Hz sensor processing
+  render_fps_min: 30  # Minimum 30 FPS
+  render_fps_target: 60  # Target 60 FPS
+  optimizer_hz: 10  # 10-15 Hz optimization

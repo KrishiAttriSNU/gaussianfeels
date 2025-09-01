@@ -1,0 +1,319 @@
+# Comprehensive Configuration for Gaussian Completion Training
+# Optimized for 8GB VRAM constraints with real-time performance focus
+
+# Project metadata
+project:
+  name: "gaussian_completion"
+  version: "1.0.0"
+  description: "Gaussian Splatting Point Cloud Completion System"
+  authors: ["GaussianFeels Team"]
+  
+# Model architecture configuration
+model:
+  # Core architecture parameters
+  name: "gaussian_completion_transformer"
+  backbone: "point_transformer"  # point_transformer, pointnet2, dgcnn
+  
+  # Model dimensions (optimized for 8GB VRAM)
+  input_dim: 3  # X, Y, Z coordinates
+  hidden_dim: 512  # Reduced from 1024 for memory efficiency
+  output_dim: 3  # Completed point coordinates
+  num_heads: 8  # Attention heads
+  num_layers: 6  # Transformer layers (reduced from 12)
+  
+  # Point cloud specific parameters
+  max_input_points: 2048  # Maximum input points per sample
+  max_output_points: 4096  # Maximum completed points
+  completion_ratio: 2.0  # Target completion ratio
+  
+  # Feature processing
+  use_normals: true  # Include normal vectors
+  use_colors: false  # Disable colors for memory efficiency
+  feature_dim: 64  # Feature embedding dimension
+  
+  # Attention mechanism
+  attention_dropout: 0.1
+  feed_forward_dim: 1024  # FFN dimension
+  positional_encoding: "learned"  # learned, sinusoidal
+  
+  # Activation functions
+  activation: "gelu"  # gelu, relu, swish
+  layer_norm: true
+  
+# Training configuration optimized for 8GB VRAM
+training:
+  # Memory optimization settings
+  gradient_accumulation_steps: 8  # Accumulate gradients across steps
+  max_batch_size: 4  # Small batch size for memory efficiency
+  mixed_precision: true  # Use automatic mixed precision (AMP)
+  gradient_checkpointing: true  # Trade compute for memory
+  pin_memory: false  # Disable for limited VRAM
+  prefetch_factor: 2  # Prefetch batches
+  
+  # Core training parameters
+  num_epochs: 100
+  learning_rate: 1e-4  # Conservative learning rate
+  weight_decay: 1e-5
+  warmup_steps: 1000
+  max_grad_norm: 1.0  # Gradient clipping
+  
+  # Learning rate scheduling
+  scheduler:
+    type: "cosine_annealing"  # cosine_annealing, step, exponential
+    T_max: 100  # Maximum iterations for cosine annealing
+    eta_min: 1e-6  # Minimum learning rate
+    warmup_epochs: 10
+  
+  # Optimizer configuration
+  optimizer:
+    type: "adamw"  # adamw, adam, sgd
+    betas: [0.9, 0.999]
+    eps: 1e-8
+    amsgrad: false
+  
+  # Early stopping
+  early_stopping:
+    patience: 10
+    min_delta: 1e-4
+    monitor: "val_loss"
+    mode: "min"
+  
+  # Validation and checkpointing
+  validation_frequency: 100  # Validate every N steps
+  save_frequency: 500  # Save checkpoint every N steps
+  log_frequency: 50  # Log metrics every N steps
+  
+  # Paths
+  checkpoint_dir: "completion/checkpoints"
+  log_dir: "completion/logs"
+  tensorboard_dir: "completion/tensorboard"
+  
+  # Device configuration
+  device: "auto"  # auto, cpu, cuda
+  num_workers: 2  # Reduced for memory efficiency
+  
+# Loss function configuration
+loss:
+  # Loss component weights
+  chamfer_weight: 1.0  # Primary geometric loss
+  constraint_weight: 0.5  # Shape consistency
+  kl_weight: 0.1  # Distribution regularization
+  
+  # Chamfer distance settings
+  chamfer:
+    bidirectional: true  # Two-way Chamfer distance
+    use_sqrt: true  # Use square root for L1-like behavior
+    outlier_threshold: null  # Optional outlier rejection
+    reduction: "mean"
+  
+  # Constraint loss settings
+  constraint:
+    smoothness_weight: 1.0
+    density_weight: 0.5
+    normal_weight: 0.3
+    primitive_weight: 0.2
+    k_neighbors: 16  # Neighbors for local analysis
+  
+  # KL regularization settings
+  kl_regularization:
+    spatial_weight: 1.0
+    feature_weight: 0.5
+    attention_weight: 0.3
+    temperature: 1.0
+  
+  # Adaptive weighting
+  adaptive_weighting: true
+  warmup_steps: 1000
+
+# Dataset configuration
+dataset:
+  # Dataset selection
+  type: "shapenet"  # shapenet, modelnet, custom
+  subset: "chair"  # Specific category for initial training
+  excluded_trials: ["077_rubiks_cube/79"]
+  
+  # Data paths
+  train_path: "data/train"
+  val_path: "data/val"
+  test_path: "data/test"
+  
+  # Data preprocessing
+  normalize: true
+  center: true
+  scale_method: "unit_sphere"  # unit_sphere, unit_cube, std_norm
+  
+  # Point cloud sampling
+  input_sampling:
+    method: "random"  # random, farthest_point, grid
+    num_points: 1024  # Input points per sample
+    noise_level: 0.01  # Gaussian noise std
+  
+  target_sampling:
+    method: "dense"  # dense, farthest_point
+    num_points: 2048  # Target points per sample
+  
+  # Data augmentation
+  augmentation:
+    enabled: true
+    rotation: true
+    scaling: [0.8, 1.2]  # Scale range
+    jittering: 0.02  # Point jitter std
+    dropout: 0.1  # Random point dropout
+  
+  # Memory and loading
+  cache_dataset: false  # Disable caching for memory efficiency
+  prefetch_batches: 4
+  
+# Performance optimization for real-time inference
+optimization:
+  # Model optimization
+  compile_model: true  # Use torch.compile if available
+  channels_last: false  # Memory format optimization
+  
+  # Quantization (post-training)
+  quantization:
+    enabled: false  # Enable after training
+    method: "dynamic"  # dynamic, static, qat
+    dtype: "qint8"
+  
+  # ONNX export configuration
+  onnx_export:
+    enabled: false
+    opset_version: 11
+    dynamic_axes: true
+  
+  # TensorRT optimization
+  tensorrt:
+    enabled: false  # Enable for production deployment
+    precision: "fp16"  # fp16, int8
+    workspace_size: 2048  # MB
+  
+  # Memory management
+  memory:
+    clear_cache_frequency: 100  # Clear CUDA cache every N steps
+    garbage_collect_frequency: 500  # Force GC every N steps
+    max_split_size: 64  # CUDA memory pool split size (MB)
+
+# Distributed training (optional)
+distributed:
+  enabled: false  # Single GPU training for 8GB constraint
+  backend: "nccl"  # nccl, gloo
+  init_method: "env://"
+  world_size: 1
+  rank: 0
+
+# Monitoring and logging
+monitoring:
+  # Weights & Biases
+  wandb:
+    enabled: false  # Disable to save memory
+    project: "gaussian_completion"
+    entity: null
+    tags: ["8gb_vram", "phase1"]
+  
+  # TensorBoard
+  tensorboard:
+    enabled: true
+    log_graph: false  # Disable graph logging for memory
+    log_embeddings: false
+  
+  # System monitoring
+  system:
+    monitor_gpu: true
+    monitor_memory: true
+    alert_threshold: 0.9  # Alert at 90% VRAM usage
+  
+  # Metrics to track
+  metrics:
+    - "train_loss"
+    - "val_loss"
+    - "chamfer_distance"
+    - "constraint_loss"
+    - "kl_loss"
+    - "learning_rate"
+    - "gpu_memory_used"
+    - "training_time_per_epoch"
+
+# Testing and evaluation
+evaluation:
+  # Evaluation metrics
+  metrics:
+    - "chamfer_distance"
+    - "hausdorff_distance" 
+    - "f1_score"  # Point-wise F1
+    - "completeness"  # Completion quality
+    - "accuracy"  # Geometric accuracy
+  
+  # Test-time augmentation
+  tta:
+    enabled: false
+    num_augmentations: 5
+  
+  # Benchmarking
+  benchmark:
+    enabled: true
+    num_samples: 100
+    measure_inference_time: true
+    measure_memory_usage: true
+
+# Integration with existing GaussianFeels pipeline
+integration:
+  # Pipeline compatibility
+  input_format: "ply"  # ply, pcd, xyz
+  output_format: "gaussian_splats"  # gaussian_splats, point_cloud
+  
+  # Coordinate system
+  coordinate_system: "right_handed"  # right_handed, left_handed
+  up_axis: "y"  # x, y, z
+  
+  # Scale compatibility
+  scene_scale: "auto"  # auto, meters, centimeters
+  
+  # Quality settings
+  completion_quality: "balanced"  # fast, balanced, high
+  
+  # Real-time constraints
+  max_inference_time: 100  # milliseconds
+  target_fps: 30  # For real-time applications
+
+# Development and debugging
+development:
+  debug_mode: false
+  profiling: false
+  save_intermediate_results: false
+  visualize_training: false
+  
+  # Memory debugging
+  detect_anomaly: false  # PyTorch anomaly detection
+  memory_profiling: false
+  
+  # Model debugging
+  gradient_debug: false
+  weight_debug: false
+
+# Phase 1 specific settings
+phase1:
+  focus: "foundation"
+  target_metrics:
+    chamfer_distance: 0.01  # Target Chamfer distance
+    inference_time: 100  # milliseconds
+    memory_usage: 6.0  # GB (leave 2GB buffer)
+  
+  # Incremental complexity
+  start_simple: true  # Begin with basic point clouds
+  gradually_increase_complexity: true
+  complexity_schedule: "linear"  # linear, exponential
+  
+  # Success criteria
+  minimum_completion_quality: 0.8
+  stability_epochs: 5  # Epochs of stable performance
+  
+# Future phases preparation
+future_phases:
+  phase2:
+    focus: "integration"
+    target_features: ["real_time", "multi_view"]
+  
+  phase3:
+    focus: "optimization"
+    target_features: ["mobile_deployment", "edge_computing"]

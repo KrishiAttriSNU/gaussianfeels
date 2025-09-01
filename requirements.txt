@@ -1,0 +1,103 @@
+# Core ML/DL Libraries
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+numpy>=1.22.0
+scipy>=1.9.0
+
+# Computer Vision & 3D Processing
+opencv-python>=4.7.0
+open3d>=0.17.0
+trimesh>=3.20.0
+matplotlib>=3.7.0
+plotly>=5.15.0
+Pillow>=9.0.0
+scikit-image>=0.20.0
+
+# Machine Learning & Data Science
+scikit-learn>=1.2.0
+pandas>=2.0.0
+seaborn>=0.12.0
+
+# Configuration & Hydra
+hydra-core>=1.3.0
+omegaconf>=2.3.0
+pyyaml>=6.0
+
+# 3D Graphics & Geometry
+# pytorch3d>=0.7.4  # Not available for Python 3.11 yet, will install separately if needed
+kornia>=0.7.0
+roma>=1.3.0
+
+# Optimization & Pose Estimation
+theseus-ai>=0.2.0
+scikit-optimize>=0.9.0
+
+# Tactile & Vision Transformers
+timm>=0.9.0
+transformers>=4.30.0
+
+# Utilities & Development
+tqdm>=4.65.0
+termcolor>=2.3.0
+pathlib2>=2.3.0
+dataclasses-json>=0.5.0
+typing-extensions>=4.5.0
+
+# Profiling & Monitoring
+psutil>=5.9.0
+memory-profiler>=0.60.0
+line-profiler>=4.0.0
+snakeviz>=2.2.0
+yappi>=1.4.0
+
+# Experiment Tracking
+wandb>=0.15.0
+tensorboard>=2.13.0
+
+# File I/O & Data Handling
+h5py>=3.8.0
+imageio>=2.30.0
+imageio-ffmpeg>=0.4.8
+pickle-mixin>=1.0.2
+
+# Networking & Utilities
+requests>=2.30.0
+gdown>=4.7.0
+ffmpeg-python>=0.2.0
+
+# Specialized Libraries
+urdf-parser-py>=0.0.4
+pycocotools>=2.0.7
+einops>=0.6.1
+numba>=0.57.0
+
+# Development Tools
+ipython>=8.12.0
+ipykernel>=6.22.0
+jupyter>=1.0.0
+ipywidgets>=8.0.0
+
+# Testing & Quality
+pytest>=7.3.0
+black>=23.0.0
+isort>=5.12.0
+flake8>=6.0.0
+mypy>=1.3.0
+
+# Additional Graphics & Visualization
+pyglet>=1.5.27
+pyopengl>=3.1.0
+pyvista>=0.40.0
+networkx>=3.1
+
+# Spatial & Geometric Processing
+shapely>=2.0.0
+rtree>=1.0.0
+libspatialindex>=1.9.3
+
+# Optional: For GPU acceleration and CUDA support
+# These will be installed separately based on CUDA version
+# torch-scatter
+# torch-sparse
+# torch-geometric

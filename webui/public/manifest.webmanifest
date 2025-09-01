@@ -1,0 +1,12 @@
+{
+  "name": "GaussianFeels",
+  "short_name": "GFeels",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3498db",
+  "icons": []
+}
+
+
+
